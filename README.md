@@ -13,6 +13,7 @@ Description: O pacote contém funções para realizar análises
     operacionais, como: construção de arquivos para posterior 
     utilização no BILOG-MG; alocação de itens e indivíduos na escala 
     do teste; análise dos parâmetros dos itens estimados pelo BILOG-MG.
+
 License: What license is it under?
 
 Encoding: UTF-8
