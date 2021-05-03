@@ -9,6 +9,9 @@ adeq.par(
   a = list(0.45, 4),
   b = list(-4, 4),
   c = list(0, 0.45),
+  erro.a = NULL,
+  erro.b = NULL,
+  erro.c = NULL,
   salvar = FALSE
 )
 }
@@ -20,6 +23,12 @@ adeq.par(
 \item{b}{Vetor com o menor valor aceitável e o maior valor aceitável do parâmetro 'b'}
 
 \item{c}{Vetor com o menor valor aceitável e o maior valor aceitável do parâmetro 'c'}
+
+\item{erro.a}{valor do maior valor aceitável para o erro do parâmetro 'a'}
+
+\item{erro.b}{valor do maior valor aceitável para o erro do parâmetro 'b'}
+
+\item{erro.c}{valor do maior valor aceitável para o erro do parâmetro 'c'}
 
 \item{salvar}{Valor lógico. Indica se o resultado será salvo em um arquivo; caso seja TRUE, o arquivo será salvo como "ITENS_FORA_INTERVALO.txt"}
 }

@@ -7,19 +7,19 @@
 ler.par(arq.par, prog = "BLM", categorias)
 }
 \arguments{
-\item{arq.par}{Arquivo .PAR}
+\item{arq.par}{Arquivo \code{.PAR}}
 
-\item{prog}{O programa que produziu o arquivo .PAR. Use 'BLM' (padrão)
-para BILOG-MG e 'MLM' para MULTILOG.}
+\item{prog}{O programa que produziu o arquivo \code{.PAR}. Use \code{'BLM'} (padrão)
+para BILOG-MG e \code{'MLM'} para MULTILOG.}
 
-\item{categorias}{Somente se prog = 'MLM". O número máximo de categorias
+\item{categorias}{Somente se prog = \code{'MLM'}. O número máximo de categorias
 de um item.}
 }
 \value{
 A função retorna um objeto do tipo data.frame com os dados do arquivo .PAR
 }
 \description{
-Importar o arquivo .PAR produzido pelo BILOG-MG ou MULTILOG
+Importar o arquivo \code{.PAR} produzido pelo BILOG-MG ou MULTILOG
 }
 \details{
 Utilize este campo para escrever detalhes mais tecnicos da
