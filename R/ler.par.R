@@ -1,12 +1,12 @@
 #' @title Importação do arquivo PAR
 #' @name ler.par
 #'
-#' @description Importar o arquivo .PAR produzido pelo BILOG-MG ou MULTILOG
+#' @description Importar o arquivo `.PAR` produzido pelo BILOG-MG ou MULTILOG
 #'
-#' @param arq.par Arquivo .PAR
-#' @param prog O programa que produziu o arquivo .PAR. Use 'BLM' (padrão)
-#' para BILOG-MG e 'MLM' para MULTILOG.
-#' @param categorias Somente se prog = 'MLM". O número máximo de categorias
+#' @param arq.par Arquivo `.PAR`
+#' @param prog O programa que produziu o arquivo `.PAR`. Use `'BLM'` (padrão)
+#' para BILOG-MG e `'MLM'` para MULTILOG.
+#' @param categorias Somente se prog = `'MLM'`. O número máximo de categorias
 #' de um item.
 #'
 #' @details Utilize este campo para escrever detalhes mais tecnicos da
