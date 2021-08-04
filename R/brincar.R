@@ -220,10 +220,8 @@ brincar = function()
                         shiny::br(),
                         shiny::tags$b('Posteriori'),
                         ': o produto da verossimilhança com a frequência do theta na distribuição priori.
-           O maior valor corresponde à moda dessa distribuição posteriori. Se utilizarmos
-           o método do Maximum a Posteriori (MAP). Preciso entender melhor o que representa
-           esse produto, ou seja, o que cada valor significa. É a frequência de cada theta
-           na distribuição posteriori?',
+           Se utilizarmos o método do Maximum a Posteriori (MAP), pegamos o maior valor, que
+           corresponde à moda dessa distribuição posteriori.',
                         shiny::br(),
                         shiny::tags$b('Freq.Posteriori'),
                         ': o produto da posteriori com o theta. Equivale à frequência de cada theta na
