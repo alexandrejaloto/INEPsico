@@ -69,10 +69,11 @@ brincar = function()
           ),
           shiny::actionButton("submit.cat", "Enviar", class = "btn-primary"),
           shiny::h5('Itens aplicados:', shiny::textOutput("aplicados")),
+          shiny::h4('Histórico da altura:', shiny::textOutput("printar.alt")),
+          shiny::plotOutput('plot_theta_hist', width = '40%'),
           shiny::h5('Respostas:', shiny::textOutput("padrao")),
           shiny::h5('Histórico do theta:', shiny::textOutput("theta.hist")),
-          shiny::h5('Histórico do erro:', shiny::textOutput("se.hist")),
-          shiny::h4('Histórico da altura:', shiny::textOutput("printar.alt"))
+          shiny::h5('Histórico do erro:', shiny::textOutput("se.hist"))
         ),
 
         # Parâmetros --------------------------------------------------------------
@@ -625,7 +626,7 @@ brincar = function()
     fim = reactiveVal(FALSE)
 
     altura.cat  = reactiveVal(
-      round (as.numeric (((0-m)/s) * alt.dp + alt.media), 2)
+      round (as.numeric (((0-m)/s) * alt.dp + alt.media), 3)
     )
 
     itens.disponiveis = reactive ({as.matrix(itens[-aplicados(),c(1,3:5)])})
@@ -705,11 +706,11 @@ brincar = function()
 
       delta.theta = abs (theta.hist()[length(theta.hist())] - theta.hist()[length(theta.hist())-1])
 
-      altura.cat (c(altura.cat(), round (as.numeric (((theta.cat()-m)/s) * alt.dp + alt.media), 2)))
+      altura.cat (c(altura.cat(), round (as.numeric (((theta.cat()-m)/s) * alt.dp + alt.media), 3)))
 
       output$printar.alt = shiny::renderText (altura.cat())
 
-      fim (se.prov <= .3)
+      fim (se.prov <= .4)
 
       fim (fim() | delta.theta <= .05)
 
@@ -719,6 +720,20 @@ brincar = function()
       }
 
     })
+
+
+    output$plot_theta_hist = shiny::renderPlot({
+      ggplot2::ggplot(
+        mapping = ggplot2::aes(x = 1:length(altura.cat()), y = altura.cat()),
+
+      ) +
+        ggplot2::geom_point() +
+        ggplot2::geom_line() +
+        ggplot2::scale_x_discrete(name = 'Item apresentado') +
+        ggplot2::scale_y_continuous(limits = c(1.4, 2.1), name = 'Altura') +
+        ggplot2::theme_bw()
+    })
+
     # estimar o theta ---------------------------------------------------------
 
     theta = seq(-3, 3, .1)
@@ -811,3 +826,5 @@ brincar = function()
 
   shiny::shinyApp(ui = ui, server = server)
 }
+brincar()
+
