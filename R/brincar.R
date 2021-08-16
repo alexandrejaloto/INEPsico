@@ -292,6 +292,21 @@ brincar = function()
                           )
                         )
           )
+        ),
+
+
+        # Sobre -------------------------------------------------------------------
+
+        shiny::tabPanel(
+          'Sobre',
+          'Este aplicativo foi construído por Alexandre Jaloto. Para
+          relatar erro ou sugerir mudanças, envie e-mail para alexandre.jaloto@inep.gov.br.',
+          shiny::br(),
+          shiny::br(),
+          'O questionário de altura foi elaborado originalmente pelo professor Cees Glas
+          (University of Twente) e adaptado para o português pelo professor Dalton Andrade
+          (Universidade Federal de Santa Catarina), a quem agradeço pela cessão do banco para
+          calibração.'
         )
       )
     )
