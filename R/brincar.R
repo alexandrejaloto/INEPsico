@@ -220,20 +220,23 @@ brincar = function()
            caso.',
                         shiny::br(),
                         shiny::tags$b('Posteriori'),
-                        ': o produto da verossimilhança com a frequência do theta na distribuição priori.
-           Se utilizarmos o método do Maximum a Posteriori (MAP), pegamos o maior valor, que
+                        ': o produto da verossimilhança com a densidade do theta na
+                      distribuição
+                      priori. Isso nos dá a distribuição posteriori.
+                      Se utilizarmos o método do Maximum a Posteriori (MAP),
+                      pegamos o maior valor, que
            corresponde à moda dessa distribuição posteriori.',
                         shiny::br(),
                         shiny::tags$b('Freq.Posteriori'),
-                        ': o produto da posteriori com o theta. Equivale à frequência de cada theta na
-           distribuição posteriori obtida.',
+                        ': o produto da posteriori com o theta. Como se fosse uma ponderação
+                      de cada theta.',
                         shiny::br(),
                         shiny::br(),
-                        'O valor do EAP corresponde ao theta estimado pelo método Expected a Posteriori
-           (EAP). Esta parte ainda preciso entender melhor. Mas entendo que
-           equivale à média da frequência posteriori. Ou seja, é a razão entre a soma das
-           frequências dos thetas na posteriori e a soma da posteriori. Ou seja, a razão
-           das integrais dos gráficos.',
+                        'O valor do EAP corresponde ao theta estimado pelo método Expected
+                      a Posteriori
+           (EAP). Equivale à média da frequência posteriori. Ou seja, é a razão entre a
+           soma "dos pesos" dos thetas na posteriori e a soma da posteriori.
+           Ou seja, a razão de algo equivalente às integrais dos gráficos.',
                         shiny::br(),
                         shiny::br(),
                         shiny::tags$table(
