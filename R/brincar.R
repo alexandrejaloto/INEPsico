@@ -43,7 +43,7 @@ brincar = function()
       } else {
 
         source(
-          file.path(.libPaths()[1], 'ui_app.R'),
+          file.path(.libPaths()[1], '/INEPsico/ui_app.R'),
           local = TRUE,
           encoding = 'utf-8'
         )$value
@@ -58,7 +58,7 @@ brincar = function()
       objetos$login(TRUE)
 
       source(
-        file.path(.libPaths()[1], 'server_app.R'),
+        file.path(.libPaths()[1], '/INEPsico/server_app.R'),
         local = TRUE,
         encoding = 'utf-8'
       )$value
