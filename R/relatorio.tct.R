@@ -25,7 +25,18 @@
 relatorio.tct = function (disc, disc.extenso, teste, n.itens.comuns, n.itens.novos,
                           n.alt, tct)
 {
-  rmarkdown::render (paste0(.libPaths()[1], '/INEPsico/relatorio_tct.rmd'), output_format = 'html_document',
-                     output_file = paste0 ('/TCT_', disc, '.html'), output_dir = getwd())
+  rmarkdown::render (
+    paste0(
+      .libPaths()[1],
+      '/INEPsico/relatorio_tct.rmd'
+    ),
+    output_format = 'html_document',
+    output_file = paste0 (
+      '/TCT_',
+      disc,
+      '.html'
+    ),
+    output_dir = getwd()
+  )
 }
 
