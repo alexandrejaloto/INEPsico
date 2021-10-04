@@ -19,9 +19,9 @@ brincar = function()
 
   server <- function(input, output) {
 
-    objetos <- reactiveValues(
-      login = reactiveVal(FALSE),
-      lingua = reactiveVal(c())
+    objetos <- shiny::reactiveValues(
+      login = shiny::reactiveVal(FALSE),
+      lingua = shiny::reactiveVal(c())
     )
 
 # carrego o ui ------------------------------------------------------------
@@ -52,7 +52,7 @@ brincar = function()
 
     })
 
-    observeEvent(input$logar, {
+    shiny::observeEvent(input$logar, {
 
       objetos$lingua(input$lingua)
       objetos$login(TRUE)
@@ -67,7 +67,7 @@ brincar = function()
 
   }
 
-  shinyApp(ui = ui, server = server)
+  shiny::shinyApp(ui = ui, server = server)
 
 
 }
