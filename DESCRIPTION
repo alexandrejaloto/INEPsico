@@ -28,6 +28,7 @@ Imports:
     knitr,
     kableExtra,
     LaF,
-    catIrt
+    catIrt,
+    tableHTML
 Depends: 
     R (>= 2.10)
