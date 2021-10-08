@@ -27,6 +27,7 @@ Imports:
     rmarkdown,
     knitr,
     kableExtra,
-    LaF
+    LaF,
+    catIrt
 Depends: 
     R (>= 2.10)
