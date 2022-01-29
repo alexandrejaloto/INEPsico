@@ -70,7 +70,7 @@ set.seed(1000)
 par = as.matrix(data.frame(a = rlnorm (30, 0, .5), b = rnorm (30, 0, 1), c = rbeta (30, 5, 17)))
 pop = rnorm (5000, 0, 1)
 
-# precisa ser do tipo data.frame (nÃ£o pode ser data.table nem matrix)
+# precisa ser do tipo data.frame (não pode ser data.table nem matrix)
 banco = data.frame(simular (pop, par))
 
 calib = mirt::mirt(banco, 1, itemtype = '3PL', TOL = 0.01)
@@ -79,7 +79,7 @@ names (nota) = 'NOTA'
 par = mirt::coef(calib, simplify = TRUE, IRTpars = TRUE)$items[,1:3]
 banco$NOTA = nota
 
-# atenÃ§Ã£o para a forma de nomear
+# atenção para a forma de nomear
 names (banco) = c(paste0('I', 1:30), 'NOTA')
 head (banco)
 

@@ -52,7 +52,7 @@ c = .15
 theta = seq (100, 900, 10)
 cci (a, b, c, theta)
 
-# alterando parÃ¢mtros do grÃ¡fico
+# alterando parâmtros do gráfico
 cci (a, b, c, theta, col = 'red', lty = 2, main = 'CCI')
 
 }

@@ -505,8 +505,10 @@ output$plot_theta_hist = shiny::renderPlot({
   ) +
     ggplot2::geom_point() +
     ggplot2::geom_line() +
-    ggplot2::scale_x_discrete(name = 'Item apresentado') +
-    ggplot2::scale_y_continuous(limits = c(1.4, 2.1), name = 'Altura') +
+    ggplot2::scale_x_discrete(name = df_textos_brincar[df_textos_brincar$id == 'eixox_cat', objetos$lingua()]) +
+    ggplot2::scale_y_continuous(limits = c(1.4, 2.1), name = df_textos_brincar[df_textos_brincar$id == 'eixoy_cat', objetos$lingua()]) +
+    # ggplot2::scale_x_discrete(name = 'Item apresentado') +
+    # ggplot2::scale_y_continuous(limits = c(1.4, 2.1), name = 'Altura') +
     ggplot2::theme_bw()
 })
 

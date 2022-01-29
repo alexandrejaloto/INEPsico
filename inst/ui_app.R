@@ -92,7 +92,7 @@ shiny::shinyUI(
           '',
           radio
         ),
-        shiny::actionButton("submit.cat", "Enviar", class = "btn-primary"),
+        shiny::actionButton("submit.cat", "OK", class = "btn-primary"),
         shiny::h5(df_textos_brincar[df_textos_brincar$id == 'itens_aplicados', objetos$lingua()], shiny::textOutput("aplicados")),
         shiny::h4(df_textos_brincar[df_textos_brincar$id == 'historico_altura', objetos$lingua()], shiny::textOutput("printar.alt")),
         shiny::plotOutput('plot_theta_hist', width = '40%'),

@@ -46,7 +46,7 @@ de cada teste.
 Produz a(s) curva(s) de informação do(s) teste(s)
 }
 \examples{
-# criar objeto com os parÃ¢metros
+# criar objeto com os parâmetros
 set.seed(1000)
 pars1 = data.frame (a = runif (50, .7, 1.3), b = runif (50, -3, 3), c = runif (50, 0, 1))
 pars2 = data.frame (a = runif (50, .7, 1.3), b = runif (50, -3, 3), c = runif (50, 0, 1))
