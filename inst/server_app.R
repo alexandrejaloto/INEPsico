@@ -443,7 +443,7 @@ it_select = reactive({
 # enunciado
 tela = reactive ({
   if (fim()) {
-    a = c('Acabô')
+    a = df_textos_brincar[df_textos_brincar$id == 'fim', objetos$lingua()]
   } else {a = itens$enunciado[it_select()]}
   a
 })
