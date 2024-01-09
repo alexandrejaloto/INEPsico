@@ -9,10 +9,6 @@
 #' @param disc.cad Quantidade de disciplinas em cada caderno
 #' @param bib Objeto com o BIB
 #'
-#' @details Utilize este campo para escrever detalhes mais tecnicos da
-#'     sua funcao (se necessario), ou para detalhar melhor como
-#'     utilizar determinados argumentos.
-#'
 #' @return A função retorna uma lista com dois elementos: 'respostas' e 'gabarito'
 #'
 #' @author Alexandre Jaloto
@@ -24,14 +20,14 @@
 #' gab.mt = sample (LETTERS[1:4], 9, replace = TRUE)
 #' itens.lc = data.frame (Bloco = rep (1:3, c (3,3,3)), Posicao = rep (1:3, 3),
 #'                        Item = sample (12345:54321, 9), Origem = 'NOVO',
-#'                        Gabarito = gab.lc, Num_bilog = 201:209, 
+#'                        Gabarito = gab.lc, Num_bilog = 201:209,
 #'                        Nome_bilog = paste ('P', 0001:0009, sep = ''), Disciplina = 'LC')
 #' itens.mt = data.frame (Bloco = rep (1:3, c (3,3,3)), Posicao = rep (1:3, 3),
 #'                        Gabarito = gab.mt, Item = sample (12345:54321, 9),
 #'                        Origem = 'NOVO', Num_bilog = 201:209,
 #'                        Nome_bilog = paste ('P', 0001:0009, sep = ''), Disciplina = 'MT')
-#' 
-#' bib = data.frame (Caderno = 1:3, Disciplina1 = rep ('LC', 3), Disciplina2 = rep ('MT', 3), 
+#'
+#' bib = data.frame (Caderno = 1:3, Disciplina1 = rep ('LC', 3), Disciplina2 = rep ('MT', 3),
 #'                   Bloco1 = 1:3, Bloco2 = c(2, 3, 1), Bloco3 = 1:3, Bloco4 = c(2, 3, 1))
 #' itens = rbind (itens.lc, itens.mt)
 
@@ -43,40 +39,43 @@
 abre.banco = function (banco, itens, bib, disc, disc.cad = 2)
 
 {
-estrutura = gera.caderno (itens, bib, disc.cad)[[disc]]
+  estrutura = gera.caderno (itens, bib, disc.cad)[[disc]]
 
-# número total de cadernos
-tot.cad = max (estrutura$Caderno)
+  # número total de cadernos
+  tot.cad = max (estrutura$Caderno)
 
-# criar objeto 'aberto.' que será a base para o objeto final 'aberto'.
-# o que será feito: um loop para pegar os respondentes de cada caderno; nomeaçãoo das
-# variáveis de acordo com os códigos dos itens; rbind pelo data.table para juntar cada
-# objeto de cada loop
+  # criar objeto 'aberto.' que será a base para o objeto final 'aberto'.
+  # o que será feito: um loop para pegar os respondentes de cada caderno; nomeaçãoo das
+  # variáveis de acordo com os códigos dos itens; rbind pelo data.table para juntar cada
+  # objeto de cada loop
 
-aberto. = data.table::as.data.table(data.frame())
-for (i in 1:tot.cad)
-{
-resp = data.table::as.data.table (subset (banco, banco[,1] == i))
-cad = subset (estrutura, Caderno == i)
-names (resp) = c ('CADERNO', cad$Item)
-aberto. = rbind(aberto., resp, fill = TRUE)
-}
-aberto = list()
-aberto$respostas = data.frame (aberto.)
-names (aberto$respostas) = names (aberto.)
-rm (aberto.)
+  aberto. = data.table::as.data.table(data.frame())
+  for (i in 1:tot.cad)
+  {
+    resp = data.table::as.data.table (subset (banco, banco[,1] == i))
+    # caso não haja respondente do caderno, passa para o próximo
+    if(nrow(resp) == 0)
+      next
+    cad = subset (estrutura, Caderno == i)
+    names (resp) = c ('CADERNO', cad$Item)
+    aberto. = rbind(aberto., resp, fill = TRUE)
+  }
+  aberto = list()
+  aberto$respostas = data.frame (aberto.)
+  names (aberto$respostas) = names (aberto.)
+  rm (aberto.)
 
-# agora abrir o gabarito
-# criar objeto com os códigos dos itens (sem repetição)
-aberto[['gabarito']] = data.frame (Item = unique(estrutura$Item))
+  # agora abrir o gabarito
+  # criar objeto com os códigos dos itens (sem repetição)
+  aberto[['gabarito']] = data.frame (Item = unique(estrutura$Item))
 
-# fazer um loop para pegar cada item desse objeto e fazer tipo um procv no objeto
-# 'estrutura'
-for (i in 1:length (aberto[['gabarito']]$Item))
-{
-cod = aberto[['gabarito']]$Item[i]
-aberto[['gabarito']]$Gabarito[i] = as.character (estrutura$Gabarito [which(estrutura$Item == cod)[1]])
-}
+  # fazer um loop para pegar cada item desse objeto e fazer tipo um procv no objeto
+  # 'estrutura'
+  for (i in 1:length (aberto[['gabarito']]$Item))
+  {
+    cod = aberto[['gabarito']]$Item[i]
+    aberto[['gabarito']]$Gabarito[i] = as.character (estrutura$Gabarito [which(estrutura$Item == cod)[1]])
+  }
 
-return (aberto)
+  return (aberto)
 }
