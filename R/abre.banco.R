@@ -153,8 +153,9 @@ abre.banco = function (banco, itens, bib, disc, disc.cad = 2)
   # 'estrutura'
   for (i in 1:length (aberto[['gabarito']]$Item))
   {
+    # i = 1
     cod = aberto[['gabarito']]$Item[i]
-    aberto[['gabarito']]$Gabarito[i] = as.character (estrutura$Gabarito [which(estrutura$Item == cod)[1]])
+    aberto[['gabarito']]$Gabarito[i] = as.character (estrutura[[disc]]$Gabarito [which(estrutura[[disc]]$Item == cod)[1]])
   }
 
   return (aberto)
