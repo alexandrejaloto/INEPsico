@@ -39,24 +39,88 @@
 abre.banco = function (banco, itens, bib, disc, disc.cad = 2)
 
 {
-  estrutura = gera.caderno (itens, bib, disc.cad)[[disc]]
+
+  # disc.cad <- 2
+
+  # estrutura dos cadernos
+  # estrutura = gera.caderno (itens, bib, disc.cad)[[disc]]
+  estrutura = gera.caderno (itens, bib, disc.cad)
+  # estrutura$LC
 
   # número total de cadernos
-  tot.cad = max (estrutura$Caderno)
+  # tot.cad = max (estrutura$Caderno)
+  tot.cad = max (estrutura[[disc]]$Caderno)
 
   # criar objeto 'aberto.' que será a base para o objeto final 'aberto'.
   # o que será feito: um loop para pegar os respondentes de cada caderno; nomeaçãoo das
   # variáveis de acordo com os códigos dos itens; rbind pelo data.table para juntar cada
   # objeto de cada loop
 
+  # quais são as disciplinas do caderno?
+  disciplinas = as.character (unique (unlist (bib[,paste0('Disciplina', 1:disc.cad)])))
+  # disciplinas <- c('LC', 'MT')
+
   aberto. = data.table::as.data.table(data.frame())
   for (i in 1:tot.cad)
   {
+    # i <- 1
+
+    # selecionar os sujeitos do caderno i
     resp = data.table::as.data.table (subset (banco, banco[,1] == i))
+
     # caso não haja respondente do caderno, passa para o próximo
     if(nrow(resp) == 0)
       next
-    cad = subset (estrutura, Caderno == i)
+
+    # selecionar caderno i de cada disciplina
+
+    # fazer loop com a quantidade de disc.cad
+
+
+    # cad = list()
+    disc.n = list()
+    cad. = list()
+
+    for(j in 1:disc.cad)
+    {
+      # j = 1
+
+      # pegar a estrutura da disciplina j
+      cad.[[j]] = subset (estrutura[[disciplinas[[j]]]], Caderno == i)
+      names(cad.)[j] = disciplinas[[j]]
+
+      # qual é a disciplina j?
+      disc.n[[j]] = subset(bib, Caderno == i)[[paste0('Disciplina', j)]]
+
+    }
+
+    cad = data.frame()
+    for(j in 1:disc.cad)
+      # empilhar com a ordem do caderno
+      cad = rbind(cad, cad.[[disc.n[[j]]]])
+
+
+    # sem loop é assim
+    # cad[[disciplinas[[1]]]] = subset (estrutura[[disciplinas[[1]]]], Caderno == i)
+    # cad[[disciplinas[[2]]]] = subset (estrutura[[disciplinas[[2]]]], Caderno == i)
+
+
+    # cad1 = subset (estrutura[[disciplinas[[1]]]], Caderno == i)
+    # cad2 = subset (estrutura[[disciplinas[[2]]]], Caderno == i)
+
+
+    # disc1 = subset(bib, Caderno == i)$Disciplina1
+    # disc2 = subset(bib, Caderno == i)$Disciplina2
+
+    # subset(bib, Caderno == i)$Disciplina1
+
+
+
+    # cad = rbind(cad[[disc1]], cad[[disc2]])
+
+    # cad = rbind(cad, cad.)
+
+
     names (resp) = c ('CADERNO', cad$Item)
     aberto. = rbind(aberto., resp, fill = TRUE)
   }
@@ -65,9 +129,25 @@ abre.banco = function (banco, itens, bib, disc, disc.cad = 2)
   names (aberto$respostas) = names (aberto.)
   rm (aberto.)
 
+  cod.itens = itens %>%
+    subset(Disciplina == disc) %>%
+    dplyr::arrange(Bloco, Posicao) %>%
+    dplyr::distinct(Item) %>%
+    dplyr::pull()
+
+  names(aberto$respostas)
+
+  aberto[['respostas']][,c('CADERNO', cod.itens)]
+
+  # selecionar os itens da disc
+  aberto$respostas = aberto$respostas[,c('CADERNO', cod.itens)]
+
   # agora abrir o gabarito
+
   # criar objeto com os códigos dos itens (sem repetição)
-  aberto[['gabarito']] = data.frame (Item = unique(estrutura$Item))
+  # aberto[['gabarito']] = data.frame (Item = unique(estrutura$Item))
+
+  aberto$gabarito = data.frame (Item = cod.itens)
 
   # fazer um loop para pegar cada item desse objeto e fazer tipo um procv no objeto
   # 'estrutura'
