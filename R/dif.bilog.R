@@ -44,7 +44,7 @@
 #' @import LaF
 #'
 #' @export
-dif = function (arq.exp, arq.sco, perc = list (5, 95), dif.dif = 0.15,
+dif.bilog = function (arq.exp, arq.sco, perc = list (5, 95), dif.dif = 0.15,
                 grupo = 7, int.comum = TRUE, salvar = FALSE)
 {
   dados = ler.exp (arq.exp)
