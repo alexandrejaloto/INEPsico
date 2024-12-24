@@ -1,4 +1,4 @@
-#' @title Análise de DIF
+#' @title Análise de DIF para o BILOG-MG
 #' @name dif.bilog
 #'
 #' @description Verifica existência de DIF e a qualidade do ajuste de um item calibrado no BILOG-MG
