@@ -20,10 +20,12 @@ ATENÇÃO: precisa ser data.frame}
 \item{carac}{Quantidade de caracteres antes da leitura do vetor de resposta no BILOG-MG}
 }
 \value{
-Para cada disciplina, dois arquivos 'txt':\preformatted{1. arquivo com os forms para o BILOG-MG
+Para cada disciplina, dois arquivos 'txt':
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{1. arquivo com os forms para o BILOG-MG
 
 2. arquivo com os gabaritos dos forms para o BILOG-MG
-}
+}\if{html}{\out{</div>}}
 }
 \description{
 A partir das informaçõs do BIB e dos itens, esta função gera

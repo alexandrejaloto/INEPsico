@@ -7,7 +7,7 @@
 #' itens e testes por meio da Teoria Clássica dos Testes (TCT) e Teoria de Resposta
 #' ao Item (TRI). Além de realizar análises via TCT e produzir relatórios desses
 #' resultados, o pacote cria arquivos para serem lidos no BILOG-MG.
-#' As funções que envolvem análises via TRI são voltadas para
+#' A maioria das funções que envolvem análises via TRI são voltadas para
 #' trabalhar com resultados produzidos nesse programa.
 #'
 "_PACKAGE"

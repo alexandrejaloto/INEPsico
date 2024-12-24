@@ -23,25 +23,20 @@ A função retorna uma lista com dois elementos: 'respostas' e 'gabarito'
 \description{
 Construir um banco 'aberto' a partir de uma base com informações de respostas organizada por cadernos distintos.
 }
-\details{
-Utilize este campo para escrever detalhes mais tecnicos da
-sua funcao (se necessario), ou para detalhar melhor como
-utilizar determinados argumentos.
-}
 \examples{
 set.seed(1000)
 gab.lc = sample (LETTERS[1:4], 9, replace = TRUE)
 gab.mt = sample (LETTERS[1:4], 9, replace = TRUE)
 itens.lc = data.frame (Bloco = rep (1:3, c (3,3,3)), Posicao = rep (1:3, 3),
                        Item = sample (12345:54321, 9), Origem = 'NOVO',
-                       Gabarito = gab.lc, Num_bilog = 201:209, 
+                       Gabarito = gab.lc, Num_bilog = 201:209,
                        Nome_bilog = paste ('P', 0001:0009, sep = ''), Disciplina = 'LC')
 itens.mt = data.frame (Bloco = rep (1:3, c (3,3,3)), Posicao = rep (1:3, 3),
                        Gabarito = gab.mt, Item = sample (12345:54321, 9),
                        Origem = 'NOVO', Num_bilog = 201:209,
                        Nome_bilog = paste ('P', 0001:0009, sep = ''), Disciplina = 'MT')
 
-bib = data.frame (Caderno = 1:3, Disciplina1 = rep ('LC', 3), Disciplina2 = rep ('MT', 3), 
+bib = data.frame (Caderno = 1:3, Disciplina1 = rep ('LC', 3), Disciplina2 = rep ('MT', 3),
                   Bloco1 = 1:3, Bloco2 = c(2, 3, 1), Bloco3 = 1:3, Bloco4 = c(2, 3, 1))
 itens = rbind (itens.lc, itens.mt)
 resp = matrix (sample (LETTERS[1:4], 180, replace = TRUE), ncol = 6)

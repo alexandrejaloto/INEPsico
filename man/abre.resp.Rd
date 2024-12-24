@@ -15,9 +15,6 @@ A função retorna uma matriz com número de colunas igual à quantidade de iten
 \description{
 Separa um único vetor de respostas (vários itens) em vetores compostos pela resposta a um único item
 }
-\details{
-
-}
 \examples{
 arq.par = 'Rodada6.PAR'
 categorias = 5

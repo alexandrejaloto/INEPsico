@@ -52,9 +52,6 @@ for \code{'b65emp'} ou \code{'n65emp'}}
 
 \item{log}{Argumento lóico. A métrica é logística?}
 }
-\value{
-
-}
 \description{
 Alocar itens dicotômicos em pontos ou níveis da escala
 }
