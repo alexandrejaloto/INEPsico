@@ -35,10 +35,8 @@
 #' names(data.atual) <- c(paste0('IME_', 61:85), paste0('IME_', 1:25), paste0('IRC_', 51:60))
 #'
 #' for(i in 51:60)
-#' {
-#'  data.antigo[,i] <- sample(3, 1000, TRUE)
-#'  data.atual[,i] <- sample(3, 1000, TRUE)
-#' }
+#' {data.antigo[,i] <- sample(3, 1000, TRUE)
+#'  data.atual[,i] <- sample(3, 1000, TRUE)}
 #' fit.antigo <- mirt::mirt(data.antigo, 1, TOL = .01)
 #' fit.atual <- mirt::mirt(data.atual, 1, TOL = .01)
 #' dif <- dif.mirt(fit.antigo, fit.atual)
