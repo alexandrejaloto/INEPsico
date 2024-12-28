@@ -5,8 +5,6 @@
 #'
 #' @param unico Objeto com o vetor das respostas a todos os itens
 #'
-#' @details
-#'
 #' @return A função retorna uma matriz com número de colunas igual à quantidade de itens e número de linhas igual à quantidade de participantes.
 #'
 #' @author Alexandre Jaloto

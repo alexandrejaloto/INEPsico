@@ -12,6 +12,7 @@
 #'
 #' @return A função retorna uma lista com quatro elementos
 #' \itemize{
+#' \item `info` lista com os percentis dos grupos antigo e atual, e os pontos de quadratura utilizados
 #' \item `itens` vetor com os nomes dos itens que apresentaram DIF. Se os nomes nos bancos forem diferentes, os nomes do banco atual são apresentados
 #' \item `maxadif` `data.frame` com os itens que paresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou `0.15` e as diferenças em cada categoria de resposta
 #' \item `regressao` lista com os itens que apresentaram DIF uniforme, não uniforme e misto com o método de regressão logística
@@ -27,8 +28,8 @@
 #'
 #' a <- rlnorm(60)
 #' d <- rnorm(60)
-#' data.atual <- data.frame(simdata(a, d, 1000, '2PL'))
-#' data.antigo <- data.frame(simdata(a, d, 1000, '2PL'))
+#' data.atual <- data.frame(mirt::simdata(a, d, 1000, '2PL'))
+#' data.antigo <- data.frame(mirt::simdata(a, d, 1000, '2PL'))
 #'
 #' names(data.antigo) <- c(paste0('IME_', 1:50), paste0('IRC_', 51:60))
 #' names(data.atual) <- c(paste0('IME_', 61:85), paste0('IME_', 1:25), paste0('IRC_', 51:60))
@@ -38,8 +39,8 @@
 #'  data.antigo[,i] <- sample(3, 1000, TRUE)
 #'  data.atual[,i] <- sample(3, 1000, TRUE)
 #' }
-#' fit.antigo <- mirt(data.antigo, 1, TOL = .01)
-#' fit.atual <- mirt(data.atual, 1, TOL = .01)
+#' fit.antigo <- mirt::mirt(data.antigo, 1, TOL = .01)
+#' fit.atual <- mirt::mirt(data.atual, 1, TOL = .01)
 #' dif <- dif.mirt(fit.antigo, fit.atual)
 #'
 #' # para itens com nomes diferentes
@@ -48,8 +49,8 @@
 #' comuns.antigo <- c(paste0('I', 1:25), paste0('I', 51:60))
 #' comuns.atual <- c(paste0('IME_', 1:25), paste0('IRC_', 51:60))
 #'
-#' fit.antigo <- mirt(data.antigo, 1, TOL = .01)
-#' fit.atual <- mirt(data.atual, 1, TOL = .01)
+#' fit.antigo <- mirt::mirt(data.antigo, 1, TOL = .01)
+#' fit.atual <- mirt::mirt(data.atual, 1, TOL = .01)
 #'
 #' dif <- dif.mirt(fit.antigo, fit.atual, comuns.antigo = comuns.antigo, comuns.atual = comuns.atual)
 #'
@@ -58,6 +59,9 @@
 
 dif.mirt <- function(fit.antigo, fit.atual, comuns.antigo = NULL, comuns.atual= NULL, int.teta = c(-6, 6), n.qdpt = 61)
 {
+
+  if(sum(is.null(comuns.antigo), is.null(comuns.atual)) == 1)
+    stop('Se os nomes dos itens forem diferentes nos dois bancos, é preciso informar o nome dos itens comuns nos argumentos comuns.antigo e comuns.atual.')
 
   # diferença entre cada ponto de quadratura
   diferenca.qdpt <- (int.teta[2] - int.teta[1])/(n.qdpt - 1)
@@ -127,11 +131,16 @@ dif.mirt <- function(fit.antigo, fit.atual, comuns.antigo = NULL, comuns.atual= 
   # pontos de quadratura para análise. tem que somar diferenca.qdpt porque o objeto qdpt indica o ponto da direita do interavalo
   qdpt.analise <- qdpt > intervalo.analise[1] + diferenca.qdpt & qdpt < intervalo.analise[2]
 
+  # parâmetros dos itens comuns
+  pars <- data.frame(mirt::coef(fit.atual, IRTpars = TRUE, simplify = TRUE)$items)
+  pars <- pars[itens.comuns,]
 
   # DIF 015 e RMSD ----
 
   dif015 <- data.frame()
   difrmsd <- data.frame()
+  ajuste015 <- data.frame()
+  ajustermsd <- data.frame()
 
   for(i in 1:length(itens.comuns))
   {
@@ -198,20 +207,80 @@ dif.mirt <- function(fit.antigo, fit.atual, comuns.antigo = NULL, comuns.atual= 
         ),
         fill = TRUE
       )
+    }
 
+    # RMSD ajuste
+    prob <- mirt::probtrace(mirt::extract.item(fit.atual, which(itens.grupo.atual == item)), qdpt[qdpt.analise])
+
+    # calcular o peso para cada qdpt para o rmsd ajuste
+    peso.ajuste <- peso.atual/(sum(peso.atual))
+
+    # raiz do desvio quadrático médio (RMSD)
+    ajustermsd.prov <- c()
+
+    for(j in 2:ncol(prop.atual))
+      ajustermsd.prov[j-1] <- data.frame(sqrt(weighted.mean(x = (prop.atual[,j]-prob[,j])^2, w = peso)))
+
+    ajustermsd.prov <- data.frame(ajustermsd.prov)
+
+    names(ajustermsd.prov) <- paste0('P.', 1:(ncol(ajustermsd.prov)))
+
+    ajustermsd.prov$item <- item
+
+    ajustermsd <- data.table::rbindlist(
+      list(
+        ajustermsd,
+        ajustermsd.prov
+      ),
+      fill = TRUE
+    )
+
+    # MaxAjuste
+
+    ajuste015.prov <- as.data.frame.matrix(prop.atual-prob)
+    ajuste015.prov <- data.frame(ajuste015.prov[,-1])
+
+    ajuste015.prov$qdpt <- qdpt[qdpt.analise]
+
+    ajuste015.prov <- ajuste015.prov[apply(data.frame(ajuste015.prov[,-ncol(ajuste015.prov)]), 1, function(x) any(abs(x) > .15)),]
+
+    if (nrow(ajuste015.prov) != 0)
+    {
+
+      names(ajuste015.prov)[1:(ncol(ajuste015.prov)-1)] <- paste0('P.', 1:(ncol(ajuste015.prov)-1))
+
+      ajuste015.prov$item <- item
+
+      ajuste015 <- data.table::rbindlist(
+        list(
+          ajuste015,
+          ajuste015.prov
+        ),
+        fill = TRUE
+      )
     }
 
   }
 
-  # se tiver item com DIF
+  # se tiver item com DIF ou desajuste
   if(nrow(dif015) > 1)
     dif015 <- dplyr::select(dif015, item, qdpt, dplyr::everything())
+
+  if(nrow(ajuste015) > 1)
+    ajuste015 <- dplyr::select(ajuste015, item, qdpt, dplyr::everything())
 
   if(nrow(difrmsd) > 1)
   {
     difrmsd <- dplyr::select(difrmsd, item, dplyr::everything())
 
     difrmsd <- difrmsd[apply(difrmsd[,-1], 1, function(x) any(x > .12)),]
+  }
+
+  if(nrow(ajustermsd) > 1)
+  {
+    ajustermsd <- dplyr::select(ajustermsd, item, dplyr::everything())
+
+    ajustermsd <- ajustermsd[apply(ajustermsd[,-1], 1, function(x) any(x > .12)),]
   }
 
   # regressão logística ----
@@ -243,13 +312,17 @@ dif.mirt <- function(fit.antigo, fit.atual, comuns.antigo = NULL, comuns.atual= 
 
   # finalizar a função ----
 
-  itens <- c(dif015$item, difrmsd$item, itens.dif.log)
+  itens <- c(dif015$item, difrmsd$item, ajuste015$item, ajustermsd$item, itens.dif.log)
 
   dif <- list(
-    itens = unique(itens),
+    info = list(p.antigo = c(p05.antigo, p95.antigo),
+                p.atual = c(p05.atual, p95.atual),
+                qdpt.analise = qdpt[qdpt.analise]),
     maxadif = data.frame(dif015),
+    dif_rmsd = data.frame(difrmsd),
     regressao = dif.log,
-    rmsd = data.frame(difrmsd)
+    maxajuste = data.frame(ajuste015),
+    ajuste_rmsd = data.frame(ajustermsd)
   )
 
   return(dif)

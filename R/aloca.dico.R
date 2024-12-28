@@ -36,8 +36,6 @@
 #' avaliação. É possível que haja algum erro
 #' nessas transformações.
 #'
-#' @return
-#'
 #' @author Alexandre Jaloto
 #'
 #' @examples

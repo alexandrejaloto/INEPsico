@@ -29,6 +29,7 @@ dif.mirt(
 \value{
 A função retorna uma lista com quatro elementos
 \itemize{
+\item \code{info} lista com os percentis dos grupos antigo e atual, e os pontos de quadratura utilizados
 \item \code{itens} vetor com os nomes dos itens que apresentaram DIF. Se os nomes nos bancos forem diferentes, os nomes do banco atual são apresentados
 \item \code{maxadif} \code{data.frame} com os itens que paresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou \code{0.15} e as diferenças em cada categoria de resposta
 \item \code{regressao} lista com os itens que apresentaram DIF uniforme, não uniforme e misto com o método de regressão logística
@@ -44,8 +45,8 @@ set.seed(1234)
 
 a <- rlnorm(60)
 d <- rnorm(60)
-data.atual <- data.frame(simdata(a, d, 1000, '2PL'))
-data.antigo <- data.frame(simdata(a, d, 1000, '2PL'))
+data.atual <- data.frame(mirt::simdata(a, d, 1000, '2PL'))
+data.antigo <- data.frame(mirt::simdata(a, d, 1000, '2PL'))
 
 names(data.antigo) <- c(paste0('IME_', 1:50), paste0('IRC_', 51:60))
 names(data.atual) <- c(paste0('IME_', 61:85), paste0('IME_', 1:25), paste0('IRC_', 51:60))
@@ -55,8 +56,8 @@ for(i in 51:60)
  data.antigo[,i] <- sample(3, 1000, TRUE)
  data.atual[,i] <- sample(3, 1000, TRUE)
 }
-fit.antigo <- mirt(data.antigo, 1, TOL = .01)
-fit.atual <- mirt(data.atual, 1, TOL = .01)
+fit.antigo <- mirt::mirt(data.antigo, 1, TOL = .01)
+fit.atual <- mirt::mirt(data.atual, 1, TOL = .01)
 dif <- dif.mirt(fit.antigo, fit.atual)
 
 # para itens com nomes diferentes
@@ -65,8 +66,8 @@ names(data.antigo) <- paste0('I', 1:ncol(data.antigo))
 comuns.antigo <- c(paste0('I', 1:25), paste0('I', 51:60))
 comuns.atual <- c(paste0('IME_', 1:25), paste0('IRC_', 51:60))
 
-fit.antigo <- mirt(data.antigo, 1, TOL = .01)
-fit.atual <- mirt(data.atual, 1, TOL = .01)
+fit.antigo <- mirt::mirt(data.antigo, 1, TOL = .01)
+fit.atual <- mirt::mirt(data.atual, 1, TOL = .01)
 
 dif <- dif.mirt(fit.antigo, fit.atual, comuns.antigo = comuns.antigo, comuns.atual = comuns.atual)
 
