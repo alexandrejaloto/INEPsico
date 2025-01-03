@@ -13,6 +13,8 @@
 #' @param tct Objeto com os resultados da análise clássica (no mesmo padrão do
 #' objeto que a função tct retorna). Importante que o nome das variáveis deste
 #' objeto seja no mesmo padrão do objeto que a função tct retorna
+#' @param caminho caminho para a pasta onde o relatório será salvo.
+#' Por padrão, salva na pasta de trabalho.
 #'
 #' @return A função retorna um arquivo HTML com o relatório das análises
 #' psicométricas segundo a Teoria Clássica dos Testes (TCT).
@@ -23,7 +25,7 @@
 #' @export
 
 relatorio.tct = function (disc, disc.extenso, teste, n.itens.comuns, n.itens.novos,
-                          n.alt, tct)
+                          n.alt, tct, caminho = getwd())
 {
   rmarkdown::render (
     paste0(
@@ -36,7 +38,7 @@ relatorio.tct = function (disc, disc.extenso, teste, n.itens.comuns, n.itens.nov
       disc,
       '.html'
     ),
-    output_dir = getwd()
+    output_dir = caminho
   )
 }
 

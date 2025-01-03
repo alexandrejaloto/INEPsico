@@ -39,7 +39,7 @@ itens.mt = data.frame (Bloco = rep (1:3, c (3,3,3)), Posicao = rep (1:3, 3),
 bib = data.frame (Caderno = 1:3, Disciplina1 = rep ('LC', 3), Disciplina2 = rep ('MT', 3),
                   Bloco1 = 1:3, Bloco2 = c(2, 3, 1), Bloco3 = 1:3, Bloco4 = c(2, 3, 1))
 itens = rbind (itens.lc, itens.mt)
-resp = matrix (sample (LETTERS[1:4], 180, replace = TRUE), ncol = 6)
+resp = matrix (sample (LETTERS[1:4], 12*30, replace = TRUE), ncol = 12)
 banco = data.frame (CAD = seq(1:3), resp)
 disc = 'LC'
 aberto = abre.banco (banco = banco, itens = itens, bib = bib, disc = disc)

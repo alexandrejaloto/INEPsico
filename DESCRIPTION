@@ -31,4 +31,4 @@ Imports:
     catIrt,
     tableHTML
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5)

@@ -11,7 +11,8 @@ relatorio.tct(
   n.itens.comuns,
   n.itens.novos,
   n.alt,
-  tct
+  tct,
+  caminho = getwd()
 )
 }
 \arguments{
@@ -30,6 +31,9 @@ relatorio.tct(
 \item{tct}{Objeto com os resultados da análise clássica (no mesmo padrão do
 objeto que a função tct retorna). Importante que o nome das variáveis deste
 objeto seja no mesmo padrão do objeto que a função tct retorna}
+
+\item{caminho}{caminho para a pasta onde o relatório será salvo.
+Por padrão, salva na pasta de trabalho.}
 }
 \value{
 A função retorna um arquivo HTML com o relatório das análises
