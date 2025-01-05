@@ -5,22 +5,22 @@
 \title{Análise de DIF para o mirt}
 \usage{
 dif.mirt(
-  fit.antigo,
   fit.atual,
-  comuns.antigo = NULL,
+  fit.antigo = NULL,
   comuns.atual = NULL,
+  comuns.antigo = NULL,
   int.teta = c(-6, 6),
   n.qdpt = 61
 )
 }
 \arguments{
-\item{fit.antigo}{objeto mirt do tipo \code{SingleGroupClass} referente ao grupo em que os itens foram calibrados (grupo de referência).}
-
 \item{fit.atual}{objeto mirt do tipo \code{SingleGroupClass} referente ao grupo da aplicação em voga (grupo focal).}
 
-\item{comuns.antigo}{vetor com nomes dos itens comuns no banco antigo. Os nomes dos itens podem ser obtidos com \code{mirt::extract.mirt(fit.antigo, 'itemnames')}. Só é necessário se os nomes dos itens forem diferentes nos dois bancos.}
+\item{fit.antigo}{objeto mirt do tipo \code{SingleGroupClass} referente ao grupo em que os itens foram calibrados (grupo de referência).}
 
 \item{comuns.atual}{vetor com nomes dos itens comuns no banco atual Os nomes dos itens podem ser obtidos com \code{mirt::extract.mirt(fit.atual, 'itemnames')}. Só é necessário se os nomes dos itens forem diferentes nos dois bancos.}
+
+\item{comuns.antigo}{vetor com nomes dos itens comuns no banco antigo. Os nomes dos itens podem ser obtidos com \code{mirt::extract.mirt(fit.antigo, 'itemnames')}. Só é necessário se os nomes dos itens forem diferentes nos dois bancos.}
 
 \item{n.qdpt}{quantidade de pontos de quadratura.}
 
@@ -29,11 +29,13 @@ dif.mirt(
 \value{
 A função retorna uma lista com quatro elementos
 \itemize{
-\item \code{info} lista com os percentis dos grupos antigo e atual, e os pontos de quadratura utilizados
+\item \code{info} lista com os percentis dos grupos atual e antigo (se incluído), e os pontos de quadratura utilizados
 \item \code{itens} vetor com os nomes dos itens que apresentaram DIF. Se os nomes nos bancos forem diferentes, os nomes do banco atual são apresentados
-\item \code{maxadif} \code{data.frame} com os itens que paresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou \code{0.15} e as diferenças em cada categoria de resposta
+\item \code{maxajuste} \code{data.frame} com os itens que apresentaram desajuste pelo método MaxAjuste, com o nome do item, o ponto de quadratura em que a proporção superou \code{0.15} e as diferenças em cada categoria de resposta
+\item \code{ajuste_rmsd} \code{data.frame} com os itens que apresentaram desajuste pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
+\item \code{maxadif} \code{data.frame} com os itens que apresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou \code{0.15} e as diferenças em cada categoria de resposta
+\item \code{dif_rmsd} \code{data.frame} com os itens que apresentaram DIF pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
 \item \code{regressao} lista com os itens que apresentaram DIF uniforme, não uniforme e misto com o método de regressão logística
-\item \code{rmsd} \code{data.frame} com os itens que paresentaram DIF pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
 }
 }
 \description{
@@ -56,7 +58,7 @@ for(i in 51:60)
  data.atual[,i] <- sample(3, 1000, TRUE)}
 fit.antigo <- mirt::mirt(data.antigo, 1, TOL = .01)
 fit.atual <- mirt::mirt(data.atual, 1, TOL = .01)
-dif <- dif.mirt(fit.antigo, fit.atual)
+dif <- dif.mirt(fit.antigo = fit.antigo, fit.atual = fit.atual)
 
 # para itens com nomes diferentes
 names(data.antigo) <- paste0('I', 1:ncol(data.antigo))
@@ -67,7 +69,7 @@ comuns.atual <- c(paste0('IME_', 1:25), paste0('IRC_', 51:60))
 fit.antigo <- mirt::mirt(data.antigo, 1, TOL = .01)
 fit.atual <- mirt::mirt(data.atual, 1, TOL = .01)
 
-dif <- dif.mirt(fit.antigo, fit.atual, comuns.antigo = comuns.antigo, comuns.atual = comuns.atual)
+dif <- dif.mirt(fit.antigo = fit.antigo, fit.atual = fit.atual, comuns.atual = comuns.atual, comuns.antigo = comuns.antigo)
 
 }
 \author{
