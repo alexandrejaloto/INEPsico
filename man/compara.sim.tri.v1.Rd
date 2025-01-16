@@ -19,6 +19,16 @@ A função mostra a comparação na tela.
 \description{
 Compara resultados da V1 da análise pela TRI de bancos simulados.
 }
+\details{
+Para a análise, são excluídos automaticamente os itens que apresentem pelo menos um dos seguintes critérios:
+\itemize{
+\item a < .5 ou a > 4
+\item nenhum parâmetro b entre -2.5 e 2.5
+\item c > .45
+\item Problema de ajuste
+\item Existência de DIF
+}
+}
 \examples{
 compara.sim.tri.v1 (banco = banco.sim.3PL, tab.pars = values, objeto.mirt = fit1)
 

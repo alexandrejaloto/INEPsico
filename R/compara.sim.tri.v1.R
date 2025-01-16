@@ -7,6 +7,16 @@
 #' @param tab.pars tabela de parâmetros gerado pela função `mirt` ou `multipleGroup` com argumento `pars = 'values'`
 #' @param objeto.mirt objeto mirt da calibração
 #'
+#' @details
+#' Para a análise, são excluídos automaticamente os itens que apresentem pelo menos um dos seguintes critérios:
+#' \itemize{
+#' \item a < .5 ou a > 4
+#' \item nenhum parâmetro b entre -2.5 e 2.5
+#' \item c > .45
+#' \item Problema de ajuste
+#' \item Existência de DIF
+#' }
+#'
 #' @return A função mostra a comparação na tela.
 #'
 #' @author Alexandre Jaloto
@@ -42,9 +52,9 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
   problema.b <- apply(problema.b, 1, function(x) any(x < 2.5 & x > -2.5))
 
   itens.problema <- c(
-    rownames(pars.sim)[pars.sim$a < .4 | pars.sim$a > 4],
+    rownames(pars.sim)[pars.sim$a < .5 | pars.sim$a > 4],
     rownames(pars.sim[!problema.b,]),
-    rownames(pars.sim)[pars.sim$g > .35],
+    rownames(pars.sim)[pars.sim$g > .45],
     dif.ajuste$itens
   )
 
