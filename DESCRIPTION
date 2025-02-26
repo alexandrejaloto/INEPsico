@@ -1,6 +1,6 @@
 Package: INEPsico
 Title: Bora Facilitar a Vida
-Version: 1.2
+Version: 1.3
 Authors@R: 
     person(given = "Alexandre",
            family = "Jaloto",

@@ -30,7 +30,9 @@
 #' Dados dos itens e da análise, quais sejam: Número sequencial do item;
 #' Código do item; Gabarito do item; Índice de dificuldade; Índice de
 #' discriminação; Porcentagem de acerto no grupo inferior; Porcentagem
-#' de acerto no grupo superior; Correlação bisserial; Proporção de
+#' de acerto no grupo superior; Correlação bisserial; Correlação bisserial
+#' robusta (escore sem o item analisado);
+#' Proporção de
 #' escolha de cada alternativa; Correlação bisserial de cada alternativa.
 #'
 #' $normit
@@ -68,20 +70,16 @@
 tct = function (banco.aberto, gab.aberto, alt = c ('A', 'B', 'C', 'D', '.', '*'), usa.normit = TRUE, met.perc = 6, pop = FALSE)
 {
 
-  ########################################## CALCULAR ESCORE TOTAL ##########################################
-  ########################################## CALCULAR ESCORE TOTAL ##########################################
-  ########################################## CALCULAR ESCORE TOTAL ##########################################
+  # CALCULAR ESCORE TOTAL
 
   # número total de alternativas (incluindo branco e dupla marcação)
   n.alt = length (alt)
 
   # corrigir o teste (1 = acerto; 0 = erro)
-  correcao.1 = mirt::key2binary (banco.aberto[,c(-1)], gab.aberto[,2])
-  # alguns são NA, e o mirt corrige como 0; ou seja, precisa colocar o NA
-  correcao = ifelse (is.na(banco.aberto[,c(-1)]) == T, NA, correcao.1)
+  correcao = mirt::key2binary (banco.aberto[,c(-1)], gab.aberto[,2])
 
   # acresentar a variável da soma de acertos
-  banco.aberto$ACERTOS = rowSums (correcao.1, na.rm = TRUE)
+  banco.aberto$ACERTOS = rowSums (correcao, na.rm = TRUE)
 
   # total de cadernos
   tot.cad = max(banco.aberto[,1])
@@ -91,8 +89,7 @@ tct = function (banco.aberto, gab.aberto, alt = c ('A', 'B', 'C', 'D', '.', '*')
 
   if (usa.normit == TRUE)
   {
-    ########################################## NORMIT ##########################################
-    ########################################## NORMIT ##########################################
+    # NORMIT ----
 
     ########################### FALTA DEFINIR SE O PERCENTIL SERÁ DOS SUBMETIDOS OU DA POPULAÇÃO TOTAL ###########################
     ########################### FALTA DEFINIR SE O PERCENTIL SERÁ DOS SUBMETIDOS OU DA POPULAÇÃO TOTAL ###########################
@@ -103,297 +100,103 @@ tct = function (banco.aberto, gab.aberto, alt = c ('A', 'B', 'C', 'D', '.', '*')
     ########################### FALTA DEFINIR SE O PERCENTIL SERÁ DOS SUBMETIDOS OU DA POPULAÇÃO TOTAL ###########################
     ########################### FALTA DEFINIR SE O PERCENTIL SERÁ DOS SUBMETIDOS OU DA POPULAÇÃO TOTAL ###########################
 
-    banco.aberto$NORMIT = NA
-
-    # para escore = 0 e escore = 1
-    for (j in 1:tot.cad)
-    {
-      # selecionar os participantes do caderno j
-      cad = length(which(banco.aberto[,1] == j))
-
-      # selecionar participantes com escore 0 do caderno 1
-      tirou.0 = which(banco.aberto$ACERTOS == 0 & banco.aberto[,1] == j)
-      # quantidade de participantes com escore 0 do caderno j
-      escore.0 = length (tirou.0)
-
-      # selecionar participantes com escore até 1 do caderno 1
-      tirou.1 = which(banco.aberto$ACERTOS <= 1 & banco.aberto[,1] == j)
-
-      # quantidade de participantes com escore até 1 do caderno j
-      escore.1 = length (tirou.1)
-
-      # calcular o normit de quem acertou 0
-      normit0 = qnorm ((escore.0 + (escore.1/2))/(2*cad))
-
-      # calcular o normit de quem acertou 1
-      normit1 = qnorm ((escore.0 + escore.1)/(2*cad))
-
-      # selecionar as pessoas que acertaram 0 e são do caderno j e colocar o normit
-      # antes, tem que ver se existe alguém (tamanho != 0)
-      if (dim(subset(banco.aberto, ACERTOS == 0 & banco.aberto[,1] == j))[1] != 0)
-      {
-        # atribuir o valor de normit às pessoas do caderno j que tiveram 0 acertos
-        banco.aberto [which (banco.aberto$ACERTOS == 0
-                             & banco.aberto$CADERNO == j),]$NORMIT = normit0
-      }
-
-      # selecionar as pessoas que acertaram 1 e são do caderno j e colocar o normit
-      # antes, tem que ver se existe alguém (tamanho != 0)
-      if (dim (subset (banco.aberto, ACERTOS == 1 & banco.aberto[,1] == j))[1] !=0 )
-      {
-        # atribuir o valor de normit às pessoas do caderno j que tiveram 1 acerto
-        banco.aberto [which (banco.aberto$ACERTOS == 1
-                             & banco.aberto[,1] == j),]$NORMIT = normit1
-      }
-
-      # máximo de acertos do caderno j
-      if (nrow (subset(banco.aberto, banco.aberto[, 1] == j)) == 0)
-        stop (paste0 ('Não existem respondentes para o caderno ', j))
-
-      max.acertos = max (subset (banco.aberto, banco.aberto[,1] == j)$ACERTOS)
-      for (i in 2:max.acertos)
-      {
-        # selecionar participantes com escore até i do caderno
-        tirou.i = which (banco.aberto$ACERTOS <= i &
-                           banco.aberto[,1] == j)
-        # quantas pessoas acertaram até i?
-        escore.i = length (tirou.i)
-
-        # selecionar participantes com escore até i-1 do caderno
-        tirou.i.menor = which (banco.aberto$ACERTOS <= i-1 &
-                                 banco.aberto[,1] == j)
-        # quantas pessoas acertaram até i?
-        escore.i.menor = length (tirou.i.menor)
-
-        # calcular normit de quem acertou i
-        normit = qnorm ((escore.i.menor + escore.i)/(2*cad))
-
-        # selecionar as pessoas que acertaram i e são do caderno j e colocar o normit
-        # antes, tem que ver se existe alguém (tamanho != 0)
-        if (dim (subset (banco.aberto, ACERTOS == i & banco.aberto[,1] == j))[1] != 0)
-        {
-          # atribuir o valor de normit às pessoas do caderno j que tiveram i acertos
-          banco.aberto [which (banco.aberto$ACERTOS == i
-                               & banco.aberto[,1] == j),]$NORMIT = normit
-        }
-
-      }
-    }
-
+    banco.aberto$NORMIT = calcular_normit(banco.aberto = banco.aberto, tot.cad = tot.cad, escore = banco.aberto$ACERTOS)
 
     normit = banco.aberto
   }
-  ########################################## CALCULAR BISSERIAL E PROPORÇÃO ##########################################
-  ########################################## CALCULAR BISSERIAL E PROPORÇÃO ##########################################
-  ########################################## CALCULAR BISSERIAL E PROPORÇÃO ##########################################
-  ########################################## CALCULAR BISSERIAL E PROPORÇÃO ##########################################
-  ########################################## CALCULAR BISSERIAL E PROPORÇÃO ##########################################
-  ########################################## CALCULAR BISSERIAL E PROPORÇÃO ##########################################
 
+  # CALCULAR BISSERIAL E PROPORÇÃO ----
 
-  # calcular bisserial e proporção de acerto do item
-  biserial.item = matrix (nrow = n.item)
-  proporcao.item = matrix (nrow = n.item)
-
-  # i vai de 1 até o número total de itens
-  for (i in 1:n.item)
-  {
-
-    # selecionar quem acertou o item i (precisa do '+ 1' porque a primeira variávelo é o caderno)
-    acertou = subset (banco.aberto, banco.aberto[,1 + i] ==
-                        gab.aberto[i,2])
-
-    # selecionar só quem tentou o item de fato (desconsiderar o não apresentado - considera-se que o '9' também é não apresentado)
-    tentativas = subset (banco.aberto, banco.aberto[,1 + i] != "9"
-                         & banco.aberto[,1 + i] != "NA")
-    if (usa.normit == TRUE)
-    {
-      Mp2 = mean (acertou$NORMIT)
-      M2 = mean (tentativas$NORMIT)
-
-      # se for a população
-      if (pop == TRUE)
-      {
-        # o desvio aqui está sendo a raiz da variância da população; a função var considera n-1, assim como a função sd
-        S2 = sqrt (sum (((tentativas$NORMIT-mean (tentativas$NORMIT))^2)/(dim(tentativas)[1])))
-
-        # se for uma amostra
-      } else {
-        S2 = sd (tentativas$NORMIT)
-      }
-
-      p2 = dim (acertou)[1] / dim (tentativas)[1]
-      hp2 = exp((-qnorm (p2)^2)/2)/sqrt(2*pi)
-      bis2 = ((Mp2 - M2)/S2) * (p2 / hp2)
-    } else {
-      Mp2 = mean (acertou$ACERTOS)
-      M2 = mean (tentativas$ACERTOS)
-
-      # se for a população
-      if (pop == TRUE)
-      {
-        # o desvio aqui está sendo a raiz da variância da população; a função var considera n-1, assim como a função sd
-        S2 = sqrt (sum (((tentativas$ACERTOS-mean (tentativas$ACERTOS))^2)/(dim(tentativas)[1])))
-
-        # se for uma amostra
-      } else {
-        S2 = sd (tentativas$ACERTOS)
-      }
-
-      p2 = dim (acertou)[1] / dim (tentativas)[1]
-      hp2 = exp((-qnorm (p2)^2)/2)/sqrt(2*pi)
-      bis2 = ((Mp2 - M2)/S2) * (p2 / hp2)
-    }
-    biserial.item [i] = bis2
-    proporcao.item [i] = p2
+  # Função auxiliar para calcular proporção
+  calcular_proporcao <- function(item, gabarito) {
+    acertou <- item[item == gabarito]
+    tentativas <- item[!is.na(item) & item != "9"]
+    sum(!is.na(acertou)) / length(tentativas)
   }
 
-  rownames (biserial.item) = gab.aberto[,1]
-  rownames (proporcao.item) = gab.aberto[,1]
+  # Calcular bisserial e proporção para cada item
+  biserial.item <- sapply(1:n.item, function(i) {
+    calcular_bisserial(banco.aberto[, i + 1], if (usa.normit) banco.aberto$NORMIT else banco.aberto$ACERTOS, gab.aberto[i, 2], pop)
+  })
 
-  # calculando a bisserial e a proporção de cada alternativa de cada item
-  biserial = matrix (nrow = n.item, ncol = n.alt)
-  proporcao = matrix (nrow = n.item, ncol = n.alt)
+  biserial.item <- data.frame(biserial.item)
 
-  for (i in 1:n.item)
-  {
-    for (j in 1:n.alt)
-    {
+  proporcao.item <- sapply(1:n.item, function(i) {
+    calcular_proporcao(banco.aberto[, i + 1], gab.aberto[i, 2])
+  })
 
-      # selecionar quem marcou a alternativa alt[j]
-      distrator = subset (banco.aberto, banco.aberto[,1 + i] == alt[j])
+  proporcao.item <- data.frame(proporcao.item)
 
-      # selecionar só quem tentou o item de fato (desconsiderar o não apresentado)
-      tentativas = subset (banco.aberto, banco.aberto[,1 + i] != "9"
-                           & banco.aberto[,1 + i] != "NA")
+  rownames(biserial.item) <- gab.aberto[, 1]
+  rownames(proporcao.item) <- gab.aberto[, 1]
 
-      if (usa.normit == TRUE)
-      {
-        Mp2 = mean (distrator$NORMIT)
-        M2 = mean (tentativas$NORMIT)
+  # Calcular bisserial e proporção para cada alternativa de cada item
+  biserial <- sapply(1:n.item, function(i) {
+    sapply(1:n.alt, function(j) {
+      calcular_bisserial(banco.aberto[, i + 1], if (usa.normit) banco.aberto$NORMIT else banco.aberto$ACERTOS, alt[j], pop)
+    })
+  })
 
-        # se for a população
-        if (pop == TRUE)
-        {
-          # o desvio aqui está sendo a raiz da variância da população; a função var considera n-1, assim como a função sd
-          S2 = sqrt (sum (((tentativas$NORMIT-mean (tentativas$NORMIT))^2)/(dim(tentativas)[1])))
+  biserial <- t(biserial)
 
-          # se for uma amostra
-        } else {
-          S2 = sd (tentativas$NORMIT)
-        }
+  proporcao <- sapply(1:n.item, function(i) {
+    sapply(1:n.alt, function(j) {
+      calcular_proporcao(banco.aberto[, i + 1], alt[j])
+    })
+  })
 
-        p2 = dim (distrator)[1] / dim (tentativas)[1]
-        hp2 = exp((-qnorm (p2)^2)/2)/sqrt(2*pi)
-        bis2 = ((Mp2 - M2)/S2) * (p2 / hp2)
-      } else {
-        Mp2 = mean (distrator$ACERTOS)
-        M2 = mean (tentativas$ACERTOS)
+  proporcao <- t(proporcao)
 
-        # se for a população
-        if (pop == TRUE)
-        {
-          # o desvio aqui está sendo a raiz da variância da população; a função var considera n-1, assim como a função sd
-          S2 = sqrt (sum (((tentativas$ACERTOS-mean (tentativas$ACERTOS))^2)/(dim(tentativas)[1])))
+  colnames(biserial) <- paste("Bis_", alt, sep = "")
+  colnames(proporcao) <- paste("Prop_", alt, sep = "")
+  rownames(biserial) <- gab.aberto[, 1]
+  rownames(proporcao) <- gab.aberto[, 1]
 
-          # se for uma amostra
-        } else {
-          S2 = sd (tentativas$ACERTOS)
-        }
+  # correlação robusta ----
 
-        p2 = dim (distrator)[1] / dim (tentativas)[1]
-        hp2 = exp((-qnorm (p2)^2)/2)/sqrt(2*pi)
-        bis2 = ((Mp2 - M2)/S2) * (p2 / hp2)
-      }
+  biserial_robusta <- sapply(1:n.item, function(item_index) {
+    escore_sem_item <- rowSums(correcao[,-item_index], na.rm = TRUE)
+    if (usa.normit)
+      escore_sem_item <- calcular_normit(banco.aberto = banco.aberto[,-(item_index+1)], tot.cad = tot.cad, escore = escore_sem_item)
+    cor(correcao[,item_index], escore_sem_item, use = 'complete.obs')
+  })
 
-      biserial [i, j] = bis2
-      proporcao [i,j] = p2
+  # ÍNDICE D ----
 
-    }
+  # Função auxiliar para calcular o índice D
+  calcular_indice_d <- function(item_coluna, escore, gabarito, met.perc) {
+
+    tentativas <- escore[!is.na(item_coluna) & item_coluna != "9"]
+    valor.perc.1 <- quantile(tentativas, 0.27, type = met.perc)
+    valor.perc.2 <- quantile(tentativas, 0.73, type = met.perc)
+    perc.1 <- item_coluna[escore <= valor.perc.1]
+    perc.2 <- item_coluna[escore >= valor.perc.2]
+    acerto.perc1 <- sum(perc.1 == gabarito, na.rm = TRUE) / sum(!is.na(perc.1))
+    acerto.perc2 <- sum(perc.2 == gabarito, na.rm = TRUE) / sum(!is.na(perc.2))
+    c(acerto.perc2 - acerto.perc1, acerto.perc1, acerto.perc2)
   }
 
-  colnames (biserial) = c ( paste ("Bis_", alt, sep = ""))
-  colnames (proporcao) = c ( paste ("Prop_", alt, sep = ""))
+  # Calcular o índice D para cada item
+  escore <- if (usa.normit) banco.aberto$NORMIT else banco.aberto$ACERTOS
+  D <- sapply(1:n.item, function(i) {
+    calcular_indice_d(banco.aberto[, i + 1], escore, gab.aberto[i, 2], met.perc)
+  })
 
-  rownames (biserial) = gab.aberto[,1]
-  rownames (proporcao) = gab.aberto[,1]
+  # Transpor a matriz D para o formato desejado
+  D <- t(D)
 
-
-  ########################################## ÍNDICE D ##########################################
-  ########################################## ÍNDICE D ##########################################
-  ########################################## ÍNDICE D ##########################################
-  ########################################## ÍNDICE D ##########################################
-  ########################################## ÍNDICE D ##########################################
-  ########################################## ÍNDICE D ##########################################
-
-  # criar matriz para adicionar os índices D de cada item
-  D = matrix (nrow = n.item, ncol = 3)
-
-  for (i in 1:n.item)
-  {
-
-    # selecionar só quem tentou o item de fato (desconsiderar o não apresentado)
-    tentativas = subset (banco.aberto, banco.aberto[,1 + i] != "9"
-                         & banco.aberto[,1 + i] != "NA")
-
-    # se for usar NORMIT
-    if (usa.normit == TRUE)
-    {
-      # os dois comandos abaixo são para o caso de indicar o P27 e o P73 do grupo que foi submetido ao item
-        valor.perc.1 = quantile (tentativas$NORMIT, 0.27, type = met.perc)		# verificar o valor do percentil 73
-        valor.perc.2 = quantile (tentativas$NORMIT, 0.73, type = met.perc)		# verificar o valor do percentil 27
-
-      # selecionar o percentil 73 (os 27% com menor escore, considerando normit)
-      perc.1 = subset (tentativas, NORMIT <= valor.perc.1)
-
-      # selecionar o percentil 27 (os 27% com maior escore, considerando normit)
-      perc.2 = subset (tentativas, NORMIT >= valor.perc.2)
-
-      # se não usar NORMIT
-
-    } else {
-
-
-        # os dois comandos abaixo são para o caso de indicar o P27 e o P73 do grupo que foi submetido ao item
-        valor.perc.1 = quantile (tentativas$ACERTOS, 0.27, type = met.perc)		# verificar o valor do percentil 73
-        valor.perc.2 = quantile (tentativas$ACERTOS, 0.73, type = met.perc)		# verificar o valor do percentil 27
-
-      # selecionar o percentil 73 (os 27% com menor escore, considerando o escore)
-      perc.1 = subset (tentativas, ACERTOS <= valor.perc.1)
-
-      # selecionar o percentil 27 (os 27% com maior escore, considerando o escore)
-      perc.2 = subset (tentativas, ACERTOS >= valor.perc.2)
-    }
-
-    # selecionar os que acertaram do perc.1
-    acerto.perc1 = subset (perc.1, perc.1[,1 + i] == gab.aberto[,2][i])
-
-    # selecionar os que acertaram do perc.2
-    acerto.perc2 = subset (perc.2, perc.2[,1 + i] == gab.aberto[,2][i])
-
-    # valor de "acima"
-    acima = dim(acerto.perc2)[1] / dim(perc.2)[1]
-    # valor de "abaixo"
-    abaixo = dim(acerto.perc1)[1] / dim(perc.1)[1]
-
-    D[i,1] = acima - abaixo
-    D[i,3] = acima
-    D[i,2] = abaixo
-  }
-
-
-  ########################################## TABELA FINAL ##########################################
-  ########################################## TABELA FINAL ##########################################
-  ########################################## TABELA FINAL ##########################################
+  # TABELA FINAL ----
 
   numit = data.frame (1:n.item)
 
-  tct = data.frame (numit, gab.aberto[,1], gab.aberto[,2], proporcao.item, D, biserial.item, proporcao, biserial)
-  names (tct) = c ("Seq", "Item", "Gabarito", 'DIFI', 'DISC', 'ABAI', 'ACIM', 'BISE',colnames (proporcao), colnames(biserial))
+  tabela = data.frame (numit, gab.aberto[,1], gab.aberto[,2], proporcao.item, D, biserial.item, biserial_robusta, proporcao, biserial)
+  names (tabela) = c ("Seq", "Item", "Gabarito", 'DIFI', 'DISC', 'ABAI', 'ACIM', 'BISE', 'BISE_rob', colnames (proporcao), colnames(biserial))
 
   if (usa.normit == TRUE)
-  {tct = list(tct, normit)
-  names (tct) = c ('tct', 'normit')}
+  {
+    tabela = list(tabela, normit)
+    names (tabela) = c ('tct', 'normit')
+  }
 
-  return (tct)
+  return (tabela)
 }

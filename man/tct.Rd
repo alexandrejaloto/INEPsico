@@ -42,7 +42,9 @@ $tct
 Dados dos itens e da análise, quais sejam: Número sequencial do item;
 Código do item; Gabarito do item; Índice de dificuldade; Índice de
 discriminação; Porcentagem de acerto no grupo inferior; Porcentagem
-de acerto no grupo superior; Correlação bisserial; Proporção de
+de acerto no grupo superior; Correlação bisserial; Correlação bisserial
+robusta (escore sem o item analisado);
+Proporção de
 escolha de cada alternativa; Correlação bisserial de cada alternativa.
 
 $normit
