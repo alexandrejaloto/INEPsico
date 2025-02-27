@@ -30,8 +30,11 @@
 #' Dados dos itens e da análise, quais sejam: Número sequencial do item;
 #' Código do item; Gabarito do item; Índice de dificuldade; Índice de
 #' discriminação; Porcentagem de acerto no grupo inferior; Porcentagem
-#' de acerto no grupo superior; Correlação bisserial; Correlação bisserial
-#' robusta (escore sem o item analisado);
+#' de acerto no grupo superior; Correlação bisserial (mesma fórmula do do
+#' BILOG-MG, porém incluindo o item no escore);
+#' Correlação bisserial
+#' robusta (escore sem o item analisado; igual à do BILOG); Correlação de
+#' Parson robusta (escore sem o item analisado);
 #' Proporção de
 #' escolha de cada alternativa; Correlação bisserial de cada alternativa.
 #'
@@ -158,6 +161,13 @@ tct = function (banco.aberto, gab.aberto, alt = c ('A', 'B', 'C', 'D', '.', '*')
     escore_sem_item <- rowSums(correcao[,-item_index], na.rm = TRUE)
     if (usa.normit)
       escore_sem_item <- calcular_normit(banco.aberto = banco.aberto[,-(item_index+1)], tot.cad = tot.cad, escore = escore_sem_item)
+    calcular_bisserial(resp.item = banco.aberto[, i + 1], escore = escore_sem_item, gabarito = gab.aberto[i, 2], pop = pop)
+  })
+
+  pearson_robusta <- sapply(1:n.item, function(item_index) {
+    escore_sem_item <- rowSums(correcao[,-item_index], na.rm = TRUE)
+    if (usa.normit)
+      escore_sem_item <- calcular_normit(banco.aberto = banco.aberto[,-(item_index+1)], tot.cad = tot.cad, escore = escore_sem_item)
     cor(correcao[,item_index], escore_sem_item, use = 'complete.obs')
   })
 
@@ -189,8 +199,8 @@ tct = function (banco.aberto, gab.aberto, alt = c ('A', 'B', 'C', 'D', '.', '*')
 
   numit = data.frame (1:n.item)
 
-  tabela = data.frame (numit, gab.aberto[,1], gab.aberto[,2], proporcao.item, D, biserial.item, biserial_robusta, proporcao, biserial)
-  names (tabela) = c ("Seq", "Item", "Gabarito", 'DIFI', 'DISC', 'ABAI', 'ACIM', 'BISE', 'BISE_rob', colnames (proporcao), colnames(biserial))
+  tabela = data.frame (numit, gab.aberto[,1], gab.aberto[,2], proporcao.item, D, biserial.item, biserial_robusta, pearson_robusta, proporcao, biserial)
+  names (tabela) = c ("Seq", "Item", "Gabarito", 'DIFI', 'DISC', 'ABAI', 'ACIM', 'BISE', 'BISE_rob', 'PEARSON_rob', colnames (proporcao), colnames(biserial))
 
   if (usa.normit == TRUE)
   {

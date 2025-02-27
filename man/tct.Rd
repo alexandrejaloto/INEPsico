@@ -42,8 +42,11 @@ $tct
 Dados dos itens e da análise, quais sejam: Número sequencial do item;
 Código do item; Gabarito do item; Índice de dificuldade; Índice de
 discriminação; Porcentagem de acerto no grupo inferior; Porcentagem
-de acerto no grupo superior; Correlação bisserial; Correlação bisserial
-robusta (escore sem o item analisado);
+de acerto no grupo superior; Correlação bisserial (mesma fórmula do do
+BILOG-MG, porém incluindo o item no escore);
+Correlação bisserial
+robusta (escore sem o item analisado; igual à do BILOG); Correlação de
+Parson robusta (escore sem o item analisado);
 Proporção de
 escolha de cada alternativa; Correlação bisserial de cada alternativa.
 
