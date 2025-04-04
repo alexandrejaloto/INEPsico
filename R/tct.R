@@ -73,6 +73,8 @@
 tct = function (banco.aberto, gab.aberto, alt = c ('A', 'B', 'C', 'D', '.', '*'), usa.normit = TRUE, met.perc = 6, pop = FALSE)
 {
 
+  names(banco.aberto)[1] <- 'CADERNO'
+
   # CALCULAR ESCORE TOTAL
 
   # número total de alternativas (incluindo branco e dupla marcação)
@@ -161,7 +163,7 @@ tct = function (banco.aberto, gab.aberto, alt = c ('A', 'B', 'C', 'D', '.', '*')
     escore_sem_item <- rowSums(correcao[,-item_index], na.rm = TRUE)
     if (usa.normit)
       escore_sem_item <- calcular_normit(banco.aberto = banco.aberto[,-(item_index+1)], tot.cad = tot.cad, escore = escore_sem_item)
-    calcular_bisserial(resp.item = banco.aberto[, i + 1], escore = escore_sem_item, gabarito = gab.aberto[i, 2], pop = pop)
+    calcular_bisserial(resp.item = banco.aberto[, item_index + 1], escore = escore_sem_item, gabarito = gab.aberto[item_index, 2], pop = pop)
   })
 
   pearson_robusta <- sapply(1:n.item, function(item_index) {
