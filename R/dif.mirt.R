@@ -24,12 +24,12 @@
 #' \item `p.ajuste` percentis do grupo atual para análise de ajuste
 #' \item `qdpt.analise.dif` pontos de quadratura utilizados na análise de DIF
 #' }
-#' \item `itens` vetor com os nomes dos itens que apresentaram DIF. Se os nomes nos bancos forem diferentes, os nomes do banco atual são apresentados
-#' \item `rmsd.ajuste` `data.frame` com os itens que apresentaram desajuste pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
-#' \item `rmsd.pisa``data.frame` com os itens que apresentaram desajuste pelo método RMSD do PISA, com o nome do item e os valores de RMSD para cada categoria de resposta
-#' \item `maxadif` `data.frame` com os itens que apresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou `limite.max.dif` e as diferenças em cada categoria de resposta
-#' \item `rmsd.dif` `data.frame` com os itens que apresentaram DIF pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
-#' \item `regressao` lista com os itens que apresentaram DIF uniforme, não uniforme e misto com o método de regressão logística
+#' \item `itens` itens que apresentaram problema. Se os nomes forem diferentes nos bancos atual e antigo, os nomes do banco atual são apresentados
+#' \item `rmsd.ajuste` itens que apresentaram desajuste pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
+#' \item `rmsd.pisa` itens que apresentaram desajuste pelo método RMSD do PISA, com o nome do item e os valores de RMSD para cada categoria de resposta
+#' \item `maxadif` itens que apresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou `limite.max.dif` e as diferenças em cada categoria de resposta
+#' \item `rmsd.dif` itens que apresentaram DIF pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
+#' \item `regressao` itens que apresentaram DIF uniforme, não uniforme e misto com o método de regressão logística
 #' }
 #'
 #' @author Alexandre Jaloto

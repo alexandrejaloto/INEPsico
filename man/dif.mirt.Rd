@@ -53,12 +53,12 @@ A função retorna uma lista com quatro elementos
 \item \code{p.ajuste} percentis do grupo atual para análise de ajuste
 \item \code{qdpt.analise.dif} pontos de quadratura utilizados na análise de DIF
 }
-\item \code{itens} vetor com os nomes dos itens que apresentaram DIF. Se os nomes nos bancos forem diferentes, os nomes do banco atual são apresentados
-\item \code{rmsd.ajuste} \code{data.frame} com os itens que apresentaram desajuste pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
-\item \verb{rmsd.pisa``data.frame} com os itens que apresentaram desajuste pelo método RMSD do PISA, com o nome do item e os valores de RMSD para cada categoria de resposta
-\item \code{maxadif} \code{data.frame} com os itens que apresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou \code{limite.max.dif} e as diferenças em cada categoria de resposta
-\item \code{rmsd.dif} \code{data.frame} com os itens que apresentaram DIF pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
-\item \code{regressao} lista com os itens que apresentaram DIF uniforme, não uniforme e misto com o método de regressão logística
+\item \code{itens} itens que apresentaram problema. Se os nomes forem diferentes nos bancos atual e antigo, os nomes do banco atual são apresentados
+\item \code{rmsd.ajuste} itens que apresentaram desajuste pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
+\item \code{rmsd.pisa} itens que apresentaram desajuste pelo método RMSD do PISA, com o nome do item e os valores de RMSD para cada categoria de resposta
+\item \code{maxadif} itens que apresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou \code{limite.max.dif} e as diferenças em cada categoria de resposta
+\item \code{rmsd.dif} itens que apresentaram DIF pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
+\item \code{regressao} itens que apresentaram DIF uniforme, não uniforme e misto com o método de regressão logística
 }
 }
 \description{
