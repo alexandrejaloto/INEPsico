@@ -2,7 +2,7 @@
 % Please edit documentation in R/dif.mirt.R
 \name{dif.mirt}
 \alias{dif.mirt}
-\title{Análise de DIF para o mirt}
+\title{Análise de ajuste e DIF em um objeto mirt}
 \usage{
 dif.mirt(
   fit.atual,
@@ -10,7 +10,14 @@ dif.mirt(
   comuns.atual = NULL,
   comuns.antigo = NULL,
   int.teta = c(-6, 6),
-  n.qdpt = 61
+  n.qdpt = 61,
+  int.cent = TRUE,
+  limite.max.dif = 0.15,
+  limite.rmsd = 0.1,
+  limite.rmsd.pisa = 0.1,
+  p.ajuste = c(0.05, 0.95),
+  p.dif = c(0.05, 0.95),
+  limite.pseudoR2.lordif = 0.035
 )
 }
 \arguments{
@@ -18,23 +25,39 @@ dif.mirt(
 
 \item{fit.antigo}{objeto mirt do tipo \code{SingleGroupClass} referente ao grupo em que os itens foram calibrados (grupo de referência).}
 
-\item{comuns.atual}{vetor com nomes dos itens comuns no banco atual Os nomes dos itens podem ser obtidos com \code{mirt::extract.mirt(fit.atual, 'itemnames')}. Só é necessário se os nomes dos itens forem diferentes nos dois bancos.}
+\item{comuns.atual}{vetor com nomes dos itens comuns no banco atual. Os nomes dos itens podem ser obtidos com \code{mirt::extract.mirt(fit.atual, 'itemnames')}. Só é necessário se os nomes dos itens forem diferentes nos dois bancos.}
 
 \item{comuns.antigo}{vetor com nomes dos itens comuns no banco antigo. Os nomes dos itens podem ser obtidos com \code{mirt::extract.mirt(fit.antigo, 'itemnames')}. Só é necessário se os nomes dos itens forem diferentes nos dois bancos.}
 
+\item{int.teta}{intervalo dos pontos de quadratura. Esse intervalo será usado para a análise de MaxADif. O padrão é \code{c(-6, 6)}.}
+
 \item{n.qdpt}{quantidade de pontos de quadratura.}
 
-\item{int.qdpt}{intervalo dos pontos de quadratura. Esse intervalo será usado para a análise de MaxADif. O padrão é \code{c(-6, 6)}.}
+\item{int.cent}{lógico. Se TRUE, o intervalo dos pontos de quadratura é centrado. Se FALSE, o intervalo começa no ponto de quadratura. O padrão é TRUE.}
+
+\item{limite.max.dif}{limite superior para as diferenças absolutas em MaxADIF. Itens com diferenças maiores que este valor são sinalizados. O padrão é \code{0.15}.}
+
+\item{limite.rmsd}{limite superior para o RMSD (ajuste e DIF). Itens com RMSD maior que este valor são sinalizados. O padrão é \code{0.10}.}
+
+\item{limite.rmsd.pisa}{limite superior para o RMSD PISA. Itens com RMSD maior que este valor são sinalizados. O padrão é \code{0.10}.}
+
+\item{limite.pseudoR2.lordif}{limite superior para o pseudo R2 de Nagelkerke na análise de regressão logística (lordif). O padrão é \code{0.035}.}
 }
 \value{
 A função retorna uma lista com quatro elementos
 \itemize{
-\item \code{info} lista com os percentis dos grupos atual e antigo (se incluído), e os pontos de quadratura utilizados
+\item \code{info} lista com informação usada nos cálculos
+\itemize{
+\item \code{p.antigo.dif} percentis do grupo antigo para análise de DIF
+\item \code{p.atual.dif} percentis do grupo atual para análise de DIF
+\item \code{p.ajuste} percentis do grupo atual para análise de ajuste
+\item \code{qdpt.analise.dif} pontos de quadratura utilizados na análise de DIF
+}
 \item \code{itens} vetor com os nomes dos itens que apresentaram DIF. Se os nomes nos bancos forem diferentes, os nomes do banco atual são apresentados
-\item \code{maxajuste} \code{data.frame} com os itens que apresentaram desajuste pelo método MaxAjuste, com o nome do item, o ponto de quadratura em que a proporção superou \code{0.15} e as diferenças em cada categoria de resposta
-\item \code{ajuste_rmsd} \code{data.frame} com os itens que apresentaram desajuste pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
-\item \code{maxadif} \code{data.frame} com os itens que apresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou \code{0.15} e as diferenças em cada categoria de resposta
-\item \code{dif_rmsd} \code{data.frame} com os itens que apresentaram DIF pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
+\item \code{rmsd.ajuste} \code{data.frame} com os itens que apresentaram desajuste pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
+\item \verb{rmsd.pisa``data.frame} com os itens que apresentaram desajuste pelo método RMSD do PISA, com o nome do item e os valores de RMSD para cada categoria de resposta
+\item \code{maxadif} \code{data.frame} com os itens que apresentaram DIF pelo método MaxADIF, com o nome do item, o ponto de quadratura em que a proporção superou \code{limite.max.dif} e as diferenças em cada categoria de resposta
+\item \code{rmsd.dif} \code{data.frame} com os itens que apresentaram DIF pelo método RMSD, com o nome do item e os valores de RMSD para cada categoria de resposta
 \item \code{regressao} lista com os itens que apresentaram DIF uniforme, não uniforme e misto com o método de regressão logística
 }
 }
