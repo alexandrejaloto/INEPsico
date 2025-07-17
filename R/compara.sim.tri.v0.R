@@ -20,7 +20,27 @@ compara.sim.tri.v0 <- function(banco, tab.pars, objeto.mirt){
   # data(banco.sim.3PL)
   # banco <- banco.sim.3PL
 
-  data <- mirt::key2binary(banco$respostas[,-1], banco$gabarito$Gabarito)
+  if(all.equal(banco, banco.sim.BIB.fechado))
+  {
+    resps <- abre.resp(banco.sim.BIB.fechado$respostas$TX_RESPOSTA)
+    banco.aberto <- cbind(banco.sim.BIB.fechado$respostas, resps)
+
+    banco.aberto <- abre.banco(banco = banco.aberto[,-c(1, 3)],
+                               itens = banco.sim.BIB.fechado$itens,
+                               bib = banco.sim.BIB.fechado$BIB,
+                               disc = 'LP',
+                               disc.cad = 1)
+
+    banco.aberto$respostas$ID <- banco.sim.BIB.fechado$respostas$ID
+    banco.aberto$respostas <- dplyr::arrange(banco.aberto$respostas, ID)
+    banco.aberto$respostas <- dplyr::select(banco.aberto$respostas,
+                                            -ID)
+
+  } else {
+    banco.aberto <- banco
+  }
+
+  data <- mirt::key2binary(banco.aberto$respostas[,-1], banco.aberto$gabarito$Gabarito)
 
   tab.sim <- mirt::mirt(data, 1, '3PL', pars = 'values')
   tab.sim[tab.sim$name == 'a1', 'prior.type'] <- 'lnorm'
@@ -78,5 +98,8 @@ compara.sim.tri.v0 <- function(banco, tab.pars, objeto.mirt){
   }
 
   if(all.equal(pars.fit, pars.sim) != TRUE)
-    print('Os parâmetros não estão iguais. É possível que o comando utilizado para calibração esteja errado.')
+    print(paste('Os parâmetros não estão iguais.',
+          'É possível que o comando utilizado para calibração esteja errado.',
+          'Outra possibilidade é que o ordenamento do banco esteja diferente.', sep = ' '))
+
 }
