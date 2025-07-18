@@ -30,18 +30,25 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
   # data(banco.sim.3PL)
   # banco <- banco.sim.3PL
 
-  if(all.equal(banco, banco.sim.BIB.fechado))
+  if(!all.equal(banco, banco.sim.3PL))
   {
-    resps <- abre.resp(banco.sim.BIB.fechado$respostas$TX_RESPOSTA)
-    banco.aberto <- cbind(banco.sim.BIB.fechado$respostas, resps)
+
+    if(all.equal(banco, banco.sim.BIB.aberto))
+      banco.fechado <- banco.sim.BIB.aberto
+
+    if(all.equal(banco, banco.sim.BIB.fechado))
+      banco.fechado <- banco.sim.BIB.fechado
+
+    resps <- abre.resp(banco.fechado$respostas$TX_RESPOSTA)
+    banco.aberto <- cbind(banco.fechado$respostas, resps)
 
     banco.aberto <- abre.banco(banco = banco.aberto[,-c(1, 3)],
-                               itens = banco.sim.BIB.fechado$itens,
-                               bib = banco.sim.BIB.fechado$BIB,
+                               itens = banco.fechado$itens,
+                               bib = banco.fechado$BIB,
                                disc = 'LP',
                                disc.cad = 1)
 
-    banco.aberto$respostas$ID <- banco.sim.BIB.fechado$respostas$ID
+    banco.aberto$respostas$ID <- banco.fechado$respostas$ID
     banco.aberto$respostas <- dplyr::arrange(banco.aberto$respostas, ID)
     banco.aberto$respostas <- dplyr::select(banco.aberto$respostas,
                                             -ID)
@@ -56,15 +63,11 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
 
   tab.sim <- pars.priori(tab.sim)
 
-  fit.sim <- mirt::mirt(data, 1, '3PL', pars = tab.sim, TOL = .001, SE = TRUE)
+  fit.sim <- mirt::mirt(data, 1, '3PL', pars = tab.sim, TOL = .001, SE = FALSE)
 
   dif.ajuste <- dif.mirt(
-    fit.antigo = fit.sim,
     fit.atual = fit.sim,
-    comuns.antigo = NULL,
-    comuns.atual = NULL,
-    int.teta = c(-6, 6),
-    n.qdpt = 61)
+    limite.rmsd = Inf)
 
   pars.sim <- data.frame(mirt::coef(fit.sim, IRTpars = TRUE, simplify = TRUE)$items)
 
@@ -80,11 +83,11 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
 
   itens.problema <- unique(itens.problema)
 
-  tab.sim <- mirt::mirt(data[,which(!colnames(data) %in% itens.problema)], 1, '3PL', pars = 'values', TOL = .001, SE = TRUE)
+  tab.sim <- mirt::mirt(data[,which(!colnames(data) %in% itens.problema)], 1, '3PL', pars = 'values', TOL = .001, SE = FALSE)
 
   tab.sim <- pars.priori(tab.sim)
 
-  fit.sim <- mirt::mirt(data[,which(!colnames(data) %in% itens.problema)], 1, '3PL', pars = tab.sim, TOL = .001, SE = TRUE)
+  fit.sim <- mirt::mirt(data[,which(!colnames(data) %in% itens.problema)], 1, '3PL', pars = tab.sim, TOL = .001, SE = FALSE)
 
   # tab.pars <- tab.sim
   # objeto.mirt <- fit.sim

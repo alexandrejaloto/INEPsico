@@ -1,9 +1,9 @@
-#' Banco com BIB fechado simulado
+#' Banco simulado em BIB com formato fechado
 #'
 #'@details
 #' Lista com quatro elementos:
 #' \itemize{
-#' \item `respostas` `data.frame` banco de respostas com três variáveis:
+#' \item `respostas` `data.frame` correspondente ao banco de respostas, com três variáveis:
 #' \itemize{
 #' \item `ID` identificação dos 10.000 sujeitos
 #' \item `CADERNO` caderno que o sujeito respondeu

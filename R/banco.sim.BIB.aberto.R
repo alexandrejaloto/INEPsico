@@ -1,7 +1,7 @@
-#' Banco com BIB aberto simulado
+#' Banco simulado em BIB com formato aberto
 #'
 #'@details
-#' Lista com dois elementos:
+#' Lista com quatro elementos:
 #' \itemize{
 #' \item `respostas` banco com 10.000 respostas e 77 itens de múltipla escolha. As respostas
 #' possíveis são "A", "B", "C", "D", "E", ".", "*"

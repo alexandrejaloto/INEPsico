@@ -16,18 +16,25 @@
 #' @export
 compara.sim.tct <- function(banco, resultado){
 
-  if(all.equal(banco, banco.sim.BIB.fechado))
+  if(!all.equal(banco, banco.sim.3PL))
   {
-    resps <- abre.resp(banco.sim.BIB.fechado$respostas$TX_RESPOSTA)
-    banco.aberto <- cbind(banco.sim.BIB.fechado$respostas, resps)
+
+    if(all.equal(banco, banco.sim.BIB.aberto))
+      banco.fechado <- banco.sim.BIB.aberto
+
+    if(all.equal(banco, banco.sim.BIB.fechado))
+      banco.fechado <- banco.sim.BIB.fechado
+
+    resps <- abre.resp(banco.fechado$respostas$TX_RESPOSTA)
+    banco.aberto <- cbind(banco.fechado$respostas, resps)
 
     banco.aberto <- abre.banco(banco = banco.aberto[,-c(1, 3)],
-                                itens = banco.sim.BIB.fechado$itens,
-                                bib = banco.sim.BIB.fechado$BIB,
-                                disc = 'LP',
-                                disc.cad = 1)
+                               itens = banco.fechado$itens,
+                               bib = banco.fechado$BIB,
+                               disc = 'LP',
+                               disc.cad = 1)
 
-    banco.aberto$respostas$ID <- banco.sim.BIB.fechado$respostas$ID
+    banco.aberto$respostas$ID <- banco.fechado$respostas$ID
     banco.aberto$respostas <- dplyr::arrange(banco.aberto$respostas, ID)
     banco.aberto$respostas <- dplyr::select(banco.aberto$respostas,
                                             -ID)
