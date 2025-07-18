@@ -3,7 +3,7 @@
 \docType{data}
 \name{banco.sim.BIB.aberto}
 \alias{banco.sim.BIB.aberto}
-\title{Banco com BIB aberto simulado}
+\title{Banco simulado em BIB com formato aberto}
 \format{
 An object of class \code{list} of length 4.
 }
@@ -11,10 +11,10 @@ An object of class \code{list} of length 4.
 banco.sim.BIB.aberto
 }
 \description{
-Banco com BIB aberto simulado
+Banco simulado em BIB com formato aberto
 }
 \details{
-Lista com dois elementos:
+Lista com quatro elementos:
 \itemize{
 \item \code{respostas} banco com 10.000 respostas e 77 itens de múltipla escolha. As respostas
 possíveis são "A", "B", "C", "D", "E", ".", "*"

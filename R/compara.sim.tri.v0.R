@@ -43,30 +43,28 @@ compara.sim.tri.v0 <- function(banco, tab.pars, objeto.mirt){
     banco.aberto$respostas <- dplyr::select(banco.aberto$respostas,
                                             -ID)
 
+    usa.normit = TRUE
+
   } else {
     banco.aberto <- banco
+
+    usa.normit = FALSE
   }
+
+  tct.sim <- tct(banco.aberto = banco$respostas, gab.aberto = banco$gabarito, alt = c("A", "B", "C", "D", "E", ".", "*"), usa.normit = usa.normit)
+
+  if(usa.normit)
+    tct.sim <- tct.sim$tct
+
+  itens.problema.bis <- tct.sim$Item[tct.sim$BISE < 0]
 
   data <- mirt::key2binary(banco.aberto$respostas[,-1], banco.aberto$gabarito$Gabarito)
 
+  data <- data[,which(!colnames(data) %in% itens.problema.bis)]
+
   tab.sim <- mirt::mirt(data, 1, '3PL', pars = 'values')
-  tab.sim[tab.sim$name == 'a1', 'prior.type'] <- 'lnorm'
-  tab.sim[tab.sim$name == 'a1', 'prior_1'] <- 0
-  tab.sim[tab.sim$name == 'a1', 'prior_2'] <- 0.5
-  tab.sim[tab.sim$name == 'a1', 'value'] <- 1.7
 
-  tab.sim[tab.sim$name == 'g', 'prior.type'] <- 'expbeta'
-  tab.sim[tab.sim$name == 'g', 'prior_1'] <- 5
-  tab.sim[tab.sim$name == 'g', 'prior_2'] <- 17
-  tab.sim[tab.sim$name == 'g', 'value'] <- 0.2
-
-  # tct.sim <- tct(banco.aberto = banco$respostas, gab.aberto = banco$gabarito, alt = c("A", "B", "C", "D", "E", ".", "*"), usa.normit = FALSE)
-
-  # if(ncol(tct.sim) != ncol(resultado))
-  #   stop('O número de colunas do seu objeto de resultado da análise pela TCT não é igual ao oficial. É possível que você tenha especificado quantidade diferente de alternativas')
-
-  # tab.pars <- tab.sim
-  # tab.pars$item[1]='abc'
+  tab.sim <- pars.priori(tab.sim)
 
   if(nrow(tab.sim) != nrow(tab.pars))
     stop('O número de linhas da sua tabela de parâmetros não é igual ao oficial. Talvez a quantidade de itens seja diferente')
@@ -106,7 +104,7 @@ compara.sim.tri.v0 <- function(banco, tab.pars, objeto.mirt){
 
   if(all.equal(pars.fit, pars.sim) != TRUE)
     print(paste('Os parâmetros não estão iguais.',
-          'É possível que o comando utilizado para calibração esteja errado.',
-          'Outra possibilidade é que o ordenamento do banco esteja diferente.', sep = ' '))
+                'É possível que o comando utilizado para calibração esteja errado.',
+                'Outra possibilidade é que o ordenamento do banco esteja diferente.', sep = ' '))
 
 }

@@ -57,7 +57,16 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
     banco.aberto <- banco
   }
 
+  tct.sim <- tct(banco.aberto = banco$respostas, gab.aberto = banco$gabarito, alt = c("A", "B", "C", "D", "E", ".", "*"), usa.normit = usa.normit)
+
+  if(usa.normit)
+    tct.sim <- tct.sim$tct
+
+  itens.problema.bis <- tct.sim$Item[tct.sim$BISE < 0]
+
   data <- mirt::key2binary(banco.aberto$respostas[,-1], banco.aberto$gabarito$Gabarito)
+
+  data <- data[,which(!colnames(data) %in% itens.problema.bis)]
 
   tab.sim <- mirt::mirt(data, 1, '3PL', pars = 'values')
 

@@ -3,7 +3,7 @@
 \docType{data}
 \name{banco.sim.BIB.fechado}
 \alias{banco.sim.BIB.fechado}
-\title{Banco com BIB fechado simulado}
+\title{Banco simulado em BIB com formato fechado}
 \format{
 An object of class \code{list} of length 4.
 }
@@ -11,12 +11,12 @@ An object of class \code{list} of length 4.
 banco.sim.BIB.fechado
 }
 \description{
-Banco com BIB fechado simulado
+Banco simulado em BIB com formato fechado
 }
 \details{
 Lista com quatro elementos:
 \itemize{
-\item \code{respostas} \code{data.frame} banco de respostas com três variáveis:
+\item \code{respostas} \code{data.frame} correspondente ao banco de respostas, com três variáveis:
 \itemize{
 \item \code{ID} identificação dos 10.000 sujeitos
 \item \code{CADERNO} caderno que o sujeito respondeu
