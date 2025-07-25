@@ -16,9 +16,10 @@ Tabela de parâmetros com valores alterados
 Altera valores iniciais e distribuição prévia dos parâmetros dos itens na tabela de parâmetros
 }
 \details{
-Distribuição do a é lognormal com média 0 e desvio 0.5,
-com valor inicial 1.7. Distribuição do c é beta com alpha 5 e beta 17,
-com valor inicial 0.2.
+Distribuição do \code{a} é \code{lognormal} com média \code{0.53062825106217}, que
+corresponde a \code{log(1.7)}, e desvio \code{0.5},
+com valor inicial \code{1.7}. Distribuição do \code{c} é \code{beta} com alpha \code{5} e beta \code{17},
+com valor inicial \code{0.2}.
 }
 \examples{
 pars.priori (parametros)
