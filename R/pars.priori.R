@@ -5,9 +5,10 @@
 #'
 #' @param values tabela de parâmetros gerado pela função `mirt` ou `multipleGroup` com argumento `pars = 'values'`
 #'
-#' @details Distribuição do a é lognormal com média 0 e desvio 0.5,
-#' com valor inicial 1.7. Distribuição do c é beta com alpha 5 e beta 17,
-#' com valor inicial 0.2.
+#' @details Distribuição do `a` é `lognormal` com média `0.53062825106217`, que
+#' corresponde a `log(1.7)`, e desvio `0.5`,
+#' com valor inicial `1.7`. Distribuição do `c` é `beta` com alpha `5` e beta `17`,
+#' com valor inicial `0.2`.
 #'
 #' @return Tabela de parâmetros com valores alterados
 #'
@@ -20,7 +21,7 @@
 pars.priori <- function(values){
 
   values[values$name == 'a1', 'prior.type'] <- 'lnorm'
-  values[values$name == 'a1', 'prior_1'] <- 0
+  values[values$name == 'a1', 'prior_1'] <- 0.53062825106217
   values[values$name == 'a1', 'prior_2'] <- 0.5
   values[values$name == 'a1', 'value'] <- 1.7
 
