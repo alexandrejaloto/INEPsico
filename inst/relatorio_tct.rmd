@@ -1,0 +1,345 @@
+
+```{r preparacao, echo = FALSE, warning = FALSE}
+
+#library (kableExtra)
+#library (dplyr)
+#library (knitr)
+
+n.total = n.itens.comuns + n.itens.novos
+
+# aqui é tipo uma introdução. Precisa ver se usou normit ou não. Caso tenha usado normit, a classe do objeto é list; se não tiver usado, a classe é 
+# data.frame. Há ainda que tomar cuidado com ites que foram listados no arquivo arq.itens mas não foram aplicados para este grupo. Por isso, será feito um 
+# filtro para selecioanr somente os itens que tenham sido submetidos a pessoas ( DIFI != NA)
+
+if (class (tct) == 'data.frame')
+{
+
+if (n.total != nrow(tct))
+stop ('Número total de itens informado não corresponde ao total de itens no objeto tct')
+
+tct. = subset (tct, DIFI != 'NA')
+
+} else {
+
+if (n.total != nrow(tct$tct))
+stop ('Número total de itens informado não corresponde ao total de itens no objeto tct')
+
+tct. = subset (tct$tct, DIFI != 'NA')
+}
+
+
+
+tct.[,4:ncol(tct.)] = INEPsico::arred (tct.[,4:ncol(tct.)], 2)
+
+# facilidade
+niv.fac = cut (tct.$DIFI, c (-Inf, .2, .4, .6, .8, Inf), right = FALSE, labels = 1:5)
+dif.maior = paste0 (format (INEPsico::arred (100*min (tct.$DIFI, na.rm = TRUE), 1), decimal.mark = ','), '%')
+dif.menor = paste0 (format (INEPsico::arred (100*max (tct.$DIFI, na.rm = TRUE), 1), decimal.mark = ','), '%')
+
+grafico.difi = tct.$DIFI
+
+facilidade = data.frame ('Classificação' = c ('Muito difíceis', 'Difíceis', 'Medianos', 'Fáceis', 'Muito fáceis'), Valores = c ('Menor que 0,20',
+	'De 0,20 a menos de 0,40', 'De 0,40 a menos de 0,60', 'De 0,60 a menos de 0,80', 'A partir de 0,80'), 
+	Quantitativo = as.numeric (table (niv.fac)), Porcentagem = paste0 (format (INEPsico::arred (100 * as.numeric (table (niv.fac))/dim(tct.)[1], 1), 
+	decimal.mark = ','), '%'))
+
+
+
+# correlação bisserial
+niv.disc.bis = cut (tct.$BISE, c (-Inf, .16, .3, .5, .8, Inf), right = FALSE, labels = 1:5)
+bis.menor = format (INEPsico::arred (min (tct.$BISE, na.rm = TRUE), 2), decimal.mark = ',')
+bis.maior = format (INEPsico::arred (max (tct.$BISE, na.rm = TRUE), 2), decimal.mark = ',')
+
+
+grafico.disc.bis = tct.$BISE
+
+discriminacao.bis = data.frame ('Classificação' = c ('Muito alta', 'Alta', 'Moderada', 'Baixa', 'Muito baixa'), Valores = c ('A partir de 0,80', 
+	'De 0,50 a menos de 0,80', 'De 0,30 a menos de 0,50', 'De 0,16 a menos de 0,30', 'Menor que 0,16'), 
+	Quantitativo = rev (as.numeric (table (niv.disc.bis))), Porcentagem = paste0 (format (INEPsico::arred (100 * rev (as.numeric (table (niv.disc.bis)))/dim(tct.)[1], 1),
+	decimal.mark = ','), '%'))
+
+
+
+# distratores com bisserial maior do que 0,05
+dist = data.frame()
+for (i in 1:n.total)
+{
+for (j in 1:n.alt)
+{
+alt = paste0 ('Bis_', LETTERS[1:n.alt][j])
+dist [i,j] = ifelse (tct.[i,alt] > 0.05, 1, 0)
+}
+
+dist [i,(n.alt+1)] = ifelse (tct.[i,'Bis_.'] > 0.05, 1, 0)
+dist [i,(n.alt+2)] = ifelse (tct.[i,'Bis_*'] > 0.05, 1, 0)
+
+# dist [i,as.numeric (tct.$Gabarito[i])] = 0
+
+dist [i, which(LETTERS == tct.$Gabarito[i])] = 0
+
+}
+
+# que itens possuem distratores com bisserial alta?
+bis.dist = rowSums (dist, na.rm = TRUE)
+
+grafico.bis.dist = tct. [, c (paste0 ('Bis_', LETTERS[1:n.alt]), 'Bis_.', 'Bis_*', 'Gabarito', 'Item')]
+
+
+
+# índice D
+niv.d = cut (tct.$DISC, c (-Inf, .2, Inf), right = FALSE, labels = 1:2)
+d.maior = paste0 (format (INEPsico::arred (100*min (tct.$DISC, na.rm = TRUE), 1), decimal.mark = ','), '%')
+d.menor = paste0 (format (INEPsico::arred (100*max (tct.$DISC, na.rm = TRUE), 1), decimal.mark = ','), '%')
+
+discriminacao.d = data.frame ('Classificação' = c ('Adequada', 'Inadequada'), Valores = c ('A partir de 0,20', 
+	'Menor que 0,20'), 
+	Quantitativo = rev (as.numeric (table (niv.d))), Porcentagem = paste0 (format (INEPsico::arred (100 * rev (as.numeric (table (niv.d)))/dim(tct.)[1], 1),
+	decimal.mark = ','), '%'))
+
+
+grafico.d = tct.$DISC
+d.maior = paste0 (format (INEPsico::arred (100*max (tct.$DISC, na.rm = TRUE), 1), decimal.mark = ','), '%')
+d.menor = paste0 (format (INEPsico::arred (100*min (tct.$DISC, na.rm = TRUE), 1), decimal.mark = ','), '%')
+
+
+
+### que item deve ser recomendado para revisão pedagógica?
+item.revisao = ifelse (bis.dist > 0 | tct.$BISE < .3 | tct.$DISC < .2, 1, 0)
+if (sum (item.revisao) > 0)
+{
+cod.item.revisao = paste (as.character (tct.$Item [item.revisao == 1]), collapse = ', ')
+} else {
+cod.item.revisao = 'não há itens recomendados para revisão segundo os critérios estabelecidos'
+}
+
+
+tct.html = tct. %>%
+	format (decimal.mark = ',', nsmall = 2)
+```
+
+
+
+
+# Relatório descritivo da análise clássica dos itens de `r disc.extenso`
+
+## Introdução
+
+Este relatório contém informações sobre os itens da prova de `r disc.extenso` do `r teste` que deverão subsidiar a equipe pedagógica na avaliação da 
+qualidade psicométrica dos itens pela Teoria Clássica dos Testes (TCT). A prova é composta por `r n.total` itens e foi elaborada com base em 
+`r n.itens.comuns` itens pré-testados e `r n.itens.novos` novos.
+
+A seguir, serão apresentados os seguintes índices de cada item:
+
+* Facilidade do item
+
+* Discriminação do item  coeficiente de correlação bisserial
+
+* Discriminação do item  índice D
+
+* Tabela com as estatísticas de todos os itens
+
+## Facilidade do item
+O índice de facilidade é medido pelo percentual de alunos que acertaram cada item. A Tabela 1 traz o quantitativo de itens para cada nível de facilidade
+segundo nossa classificação interna. Destaca-se que esse índice varia de acordo com a população. Ou seja, essa classificação não deve ser genaralizada para outras 
+aplicações.
+
+
+```{r facilidade, echo = FALSE}
+knitr::kable(facilidade, align = 'c', escape = FALSE, format = 'html') %>%
+  kableExtra::kable_styling(bootstrap_options = c('striped', 'condensed', 'responsive'))
+```
+
+
+No gráfico a seguir é apresentado o percentual de acertos de cada item. Observa-se que o item mais difícil apresentou um percentual de acerto de `r dif.maior`
+e o mais fácil, de `r dif.menor`.
+
+```{r grafico_facilidade, echo = FALSE}
+if (n.total <=30)
+{
+par (ps = 9.5, mar = c (3,3,1,1))
+barplot (grafico.difi, names.arg = tct.$Item, axisnames = TRUE, las = 2, axes = FALSE)
+abline (h = c (.2, .4, .6, .8), lty = 2)
+axis (2, at = seq (0, 1, .1), labels = seq (0, 100, 10))
+} else {
+divisao = ceiling (n.total/30)
+for (i in 1:divisao)
+{
+par (ps = 9.5, mar = c (3,3,1,1))
+barplot (grafico.difi[((i-1)*30+1):(30*i)], names.arg = tct.$Item[((i-1)*30+1):(30*i)], axisnames = TRUE, las = 2, axes = FALSE)
+abline (h = c (.2, .4, .6, .8), lty = 2)
+axis (2, at = seq (0, 1, .1), labels = seq (0, 100, 10))
+}
+}
+```
+
+
+## Discriminação do item - coeficiente de correlação bisserial
+
+A discriminação dos itens pela TCT pode ser medida calculando o coeficiente de correlação bisserial do gabarito de cada item. Essa medida mostra a 
+associação entre o desempenho dos alunos no item e o desempenho no teste e varia de -1 a 1. Quanto mais positivo o valor, mais a escolha do gabarito nesse 
+item está relacionada com o desempenho total no teste. Valores negativos e próximos de -1 indicam que as pessoas com baixo desempenho no teste estão 
+buscando o gabarito. Espera-se, portanto, que essa correlação seja positiva e alta, o que reforça o argumento de que o item discrimina bem e está medindo 
+o mesmo construto que os demais itens. Uma correlação bisserial do item abaixo de zero pode indicar problemas na indicação do gabarito ou na sua construção. 
+
+A Tabela 2 traz o quantitativo de itens para cada nível de discriminação segundo nossa classificação interna. Destaca-se que esse índice varia de acordo com a 
+população. Ou seja, essa classificação não deve ser genaralizada para outras aplicações.
+
+```{r correlacao, echo = FALSE}
+knitr::kable(discriminacao.bis, align = 'c', escape = FALSE, format = 'html') %>%
+  kableExtra::kable_styling(bootstrap_options = c('striped', 'condensed', 'responsive'))
+
+```
+
+`r if (n.total <=30) {('No gráfico')} else {('Nos gráficos')}` a seguir é apresentado o coeficiente de correlação bisserial de cada item. Observa-se que 
+o item mais discriminativo apresentou um coeficiente de correlação bisserial de `r bis.maior` e o menos discriminativo, de `r bis.menor`.
+
+
+```{r grafico_correlacao, echo = FALSE}
+if (n.total <=30)
+{
+par (ps = 9.5, mar = c (3,3,1,1))
+barplot (grafico.disc.bis, names.arg = tct.$Item, axisnames = TRUE, las = 2, axes = FALSE, col = ifelse (grafico.disc.bis < .3, 'red', 'gray'))
+abline (h = c (.16, .3, .5, .8), lty = 2)
+axis (2, at = seq (0, 1, .1), labels = seq (0, 100, 10))
+} else {
+divisao = ceiling (n.total/30)
+for (i in 1:divisao)
+{
+
+par (ps = 9.5, mar = c (3,3,1,1))
+barplot (grafico.disc.bis[((i-1)*30+1):(30*i)], names.arg = tct.$Item[((i-1)*30+1):(30*i)], axisnames = TRUE, las = 2, axes = FALSE, 
+	col = ifelse (grafico.disc.bis[((i-1)*30+1):(30*i)] < .3, 'red', 'gray'))
+abline (h = c (.16, .3, .5, .8), lty = 2)
+axis (2, at = seq (0, 1, .1), labels = seq (0, 100, 10))
+
+}
+}
+
+```
+
+Além da correlação bisserial do gabarito, calculamos também a correlação bisserial de cada distrator. É esperado, ao contrário da correlação bisserial do 
+item, que os valores para os distratores sejam negativos e próximos de -1. Uma correlação bisserial do distrator maior do que zero e, principalmente, 
+maior do que a do gabarito, pode indicar problemas na indicação do gabarito ou na sua construção. Uma correlação alta para um distrator pode indicar, 
+também, que esta alternativa está atraindo pessoas com alta proficiência. Assim, cabe investigar os motivos que levaram essas pessoas a optar por um 
+distrator.
+
+A seguir, são apresentados gráficos com as correlações bisseriais das alternativas de cada item. A alternativa correta é indicada pela cor verde; os 
+distratores que possuem correlação bisserial abaixo de 0,05 são indicados de cinza; e aqueles com bisserial maior que 0,05 estão apontados com a cor 
+vermelha. De forma geral, dos `r n.total` itens, `r sum(bis.dist)` apresentaram o coeficiente de corelação bisserial de um ou mais distrator acima de 0,05.
+
+
+```{r correlacao_alternativa, echo = FALSE}
+
+tct.plot = grafico.bis.dist[,paste0('Bis_', LETTERS[1:n.alt])]
+
+cor = ifelse (tct.plot > .05, 'red', 'gray')
+
+for (j in 1:dim(tct.plot)[1])
+{
+cor [j, paste0('Bis_', grafico.bis.dist$Gabarito)[j]] = 'green'
+}
+
+
+if (n.total <= 5)
+{
+barplot (t(tct.plot), beside = TRUE, names.arg = grafico.bis.dist$Item, col = t(cor), 
+	main = '')
+
+} else {
+
+divisao = ceiling (n.total/5)
+
+for (i in 1:(divisao-1))
+{
+bp = barplot (t(tct.plot[(((i-1)*5+1):(5*i)),]), beside = TRUE, names.arg = grafico.bis.dist$Item[(((i-1)*5+1):(5*i))], 
+	col = t(cor[(((i-1)*5+1):(5*i)),]), main = '')
+
+for (j in 1:5)
+{
+text (x = bp[,j], y = tct.plot[(((i-1)*5+1):(5*i)),][j,]/2, label = LETTERS[1:n.alt], srt = 90)
+}
+}
+
+bp = barplot (t(tct.plot[(((divisao-1)*5+1):nrow(tct.plot)),]), beside = TRUE, 
+	names.arg = grafico.bis.dist$Item[(((divisao-1)*5+1):nrow(tct.plot))], col = t(cor[(((divisao-1)*5+1):nrow(tct.plot)),]), main = '')
+
+for (j in 1:ncol(bp))
+{
+text (x = bp[,j], y = tct.plot[(((divisao-1)*5+1):nrow(tct.plot)),][j,]/2, label = LETTERS[1:n.alt], srt = 90)
+}
+}
+
+```
+
+
+
+## Discriminação do item - índice D
+A discriminação dos itens pela TCT também pode ser medida a partir do índice D do item. Esse índice corresponde à diferença entre o percentual de acerto 
+no item dos participantes com maiores escores (27% maiores valores) e o percentual de acerto dos participantes com menores escores (27% menores valores). 
+Desta forma, espera-se encontrar valores positivos; quanto maior o índice, mais discriminativo é o item. Recomenda-se que os itens com essa medida menor 
+que 0,2 sejam analisados pela equipe pedagógica. Destaca-se que esse índice varia de acordo com a população. Ou seja, essa classificação não deve ser 
+genaralizada para outras aplicações.
+
+A Tabela 3 traz o quantitativo de itens para cada nível de discriminação segundo nossa classificação interna. Destaca-se que esse índice varia de acordo com a 
+população. Ou seja, essa classificação não deve ser genaralizada para outras aplicações.
+
+```{r tabela_indiceD, echo = FALSE}
+knitr::kable(discriminacao.d, align = 'c', escape = FALSE, format = 'html') %>%
+  kableExtra::kable_styling(bootstrap_options = c('striped', 'condensed', 'responsive'))
+
+```
+
+`r if (n.total <=30) {('No gráfico')} else {('Nos gráficos')}` a seguir é apresentado o índice D de cada item. Observa-se que o item mais discriminativo 
+apresentou um índice D de `r d.maior` e o menos discriminativo, de `r d.menor`.
+
+
+
+```{r discriminacao, echo = FALSE}
+if (n.total <=30)
+{
+
+par (ps = 9.5, mar = c (3,3,1,1))
+barplot (grafico.d, names.arg = tct.$Item, axisnames = TRUE, las = 2, axes = FALSE, col = ifelse (grafico.d < .2, 'red', 'gray'))
+abline (h = .2, lty = 2)
+axis (2, at = seq (0, 1, .1), labels = seq (0, 100, 10))
+
+} else {
+divisao = ceiling (n.total/30)
+for (i in 1:divisao)
+{
+par (ps = 9.5, mar = c (3,3,1,1))
+barplot (grafico.d[((i-1)*30+1):(30*i)], names.arg = tct.$Item[((i-1)*30+1):(30*i)], axisnames = TRUE, las = 2, axes = FALSE, 
+	col = ifelse (grafico.d[((i-1)*30+1):(30*i)] < .2, 'red', 'gray'))
+abline (h = .2, lty = 2)
+axis (2, at = seq (0, 1, .1), labels = seq (0, 100, 10))
+}
+}
+```
+
+
+## Resumo da análise pela TCT
+
+A partir da análise feita, os itens recomendados para revisão pedagógica são: `r cod.item.revisao`.
+
+
+A seguir, tem-se a tabela com todas as etatísticas clássicas calculadas para cada um dos itens da aplicação. Em vermelho, os itens recomendados para 
+revisão pedagógica e os valores considerados não adequados.
+
+
+```{r resumo, echo = FALSE, warning = FALSE}
+for (i in 1:n.alt)
+{
+tct.html [,paste0('Bis_', LETTERS[i])] = kableExtra::cell_spec (tct.[,paste0('Bis_', LETTERS[i])], format = 'html', color = ifelse (is.na (dist[,i]), "black", ifelse (dist[,i] == 1, "red", "black")))
+}
+
+tct.html [,'Bis_.'] = kableExtra::cell_spec (tct.[,'Bis_.'], format = 'html', color = ifelse (is.na(dist[,(n.alt+1)]), "black", ifelse (dist[,(n.alt+1)] == 1, "red", "black")))
+tct.html [,'Bis_*'] = kableExtra::cell_spec (tct.[,'Bis_*'], format = 'html', color = ifelse (is.na(dist[,(n.alt+2)]), "black", ifelse (dist[,(n.alt+2)] == 1, "red", "black")))
+
+tct.html [,'BISE'] = kableExtra::cell_spec (tct.[,'BISE'], format = 'html', color = ifelse (is.na(dist[,(n.alt+1)]), "black", ifelse (tct.[,'BISE'] <.3, "red", "black")))
+tct.html [,'DISC'] = kableExtra::cell_spec (tct.[,'DISC'], format = 'html', color = ifelse (is.na(dist[,(n.alt+1)]), "black", ifelse (tct.[,'DISC'] <.2, "red", "black")))
+
+tct.html [,'Item'] = kableExtra::cell_spec (tct.[,'Item'], format = 'html', color = ifelse (item.revisao == 1, "red", "black"))
+
+knitr::kable(tct.html, row.names = FALSE, escape = FALSE, format = 'html') %>%
+  kableExtra::kable_styling(bootstrap_options = c('striped', 'condensed', 'responsive'))
+```
