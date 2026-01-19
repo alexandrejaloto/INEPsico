@@ -1,11 +1,33 @@
 Package: INEPsico
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Bora Facilitar a Vida
+Version: 1.3
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person(given = "Alexandre",
+           family = "Jaloto",
+           role = c("aut", "cre"),
+           email = "alexandre.jaloto@inep.gov.br",
+           comment = c(ORCID = "https://orcid.org/0000-0002-5291-1768"))
+Description: Automatização de rotinas para análises psicométricas.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Imports: 
+    catIrt,
+    data.table,
+    dplyr,
+    gdata,
+    ggplot2,
+    kableExtra,
+    knitr,
+    LaF,
+    magrittr,
+    mirt,
+    mirtCAT,
+    rmarkdown,
+    shiny,
+    shinyjs,
+    stringi,
+    stringr,
+    tableHTML
