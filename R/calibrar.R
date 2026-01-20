@@ -59,17 +59,36 @@
 #'
 #' @export
 
-calibrar <- function(resp, nodes = seq(-4, 4, length.out = 40), max_iter = 100, tol = 0.001, fixed_params = NULL) {
+calibrar <- function(resp, nodes = seq(-4, 4, length.out = 40), max_iter = 100, tol = 0.001, fixed_params = NULL)
+{
 
   resp <- as.matrix(resp)
   n_items <- ncol(resp)
   n_subjects <- nrow(resp)
 
   # Valores iniciais
-  current_params <- matrix(c(rep(1, n_items),
-                             rep(0, n_items),
-                             rep(0.1, n_items)),
-                           nrow = n_items, ncol = 3)
+  p <- colMeans(resp, na.rm = TRUE)
+
+  current_params <- matrix(0, nrow = n_items, ncol = 3)
+
+  for (j in 1:n_items) {
+    # Estimar c inicial com base no mínimo de acertos
+    c_init <- max(0.001, min(0.3, (1/5) * 0.8))  # assume 5 alternativas
+
+    # Estimar b inicial via logit inverso
+    if (p[j] > c_init && p[j] < (1 - 1e-4)) {
+      logit_p <- log((p[j] - c_init) / (1 - p[j]))
+      b_init <- -logit_p  # assumindo a = 1 inicialmente
+    } else {
+      b_init <- 0
+    }
+
+    # Limitar valores extremos
+    b_init <- pmin(pmax(b_init, -3), 3)
+
+    current_params[j, ] <- c(1.0, b_init, c_init)
+  }
+
   colnames(current_params) <- c("a", "b", "c")
 
   # Inicialização do Grupo (Métrica)
@@ -94,8 +113,8 @@ calibrar <- function(resp, nodes = seq(-4, 4, length.out = 40), max_iter = 100, 
 
     # --- ETAPA E ---
     e_step <- passo_e(a = current_params[,1], b = current_params[,2], c = current_params[,3],
-                             nodes = nodes, n_subjects = n_subjects, resp = resp,
-                             mu = current_mu, sigma = current_sigma)
+                            nodes = nodes, n_subjects = n_subjects, resp = resp,
+                            mu = current_mu, sigma = current_sigma)
 
     # --- ATUALIZAÇÃO DA MÉTRICA DO GRUPO ---
     # Só atualizamos a métrica se houver itens fixos (equalização)
@@ -110,10 +129,10 @@ calibrar <- function(resp, nodes = seq(-4, 4, length.out = 40), max_iter = 100, 
     for (j in 1:n_items) {
       if (!is_fixed[j])
         current_params[j,] <- passo_m(item_idx = j,
-                                          p_hat = e_step$p_hat,
-                                          nodes = nodes,
-                                          N_k = e_step$N_k,
-                                          start_params = current_params[j,])
+                                            p_hat = e_step$p_hat,
+                                            nodes = nodes,
+                                            N_k = e_step$N_k,
+                                            start_params = current_params[j,])
     }
 
     # Verificar convergência

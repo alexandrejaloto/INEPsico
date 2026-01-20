@@ -32,6 +32,8 @@ passo_e <- function(a, b, c, nodes = seq(-4, 4, length.out = 40), n_subjects, re
     P_jk[j, ] <- c[j] + (1 - c[j]) / (1 + exp(-a[j] * (nodes - b[j])))
   }
 
+  P_jk <- pmin(pmax(P_jk, 1e-10), 1 - 1e-10)  # ANTES de calcular log
+
   logL <- resp %*% log(P_jk) + (1 - resp) %*% log(1 - P_jk)
 
   post <- matrix(0, nrow = n_subjects, ncol = q)

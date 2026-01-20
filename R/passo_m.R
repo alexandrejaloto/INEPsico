@@ -49,7 +49,8 @@
 #' @export
 
 passo_m <- function(item_idx, p_hat, nodes, N_k, start_params,
-                        prior_c = c(5, 17)) {
+                        prior_c = c(5, 17))
+{
 
   # prior_c = c(5, 17)
 
@@ -59,30 +60,43 @@ passo_m <- function(item_idx, p_hat, nodes, N_k, start_params,
     c_i <- params[3]
 
     # Restrições básicas
-    if (a_i <= 0 | c_i <= 0 | c_i >= 1)
+    if (a_i <= 1e-8 | c_i < 0 | c_i > 1)
       return(1e10)
 
-    # Probabilidade 3PL
-    P <- c_i + (1 - c_i) / (1 + exp(-a_i * (nodes - b_i)))
+    # Cálculo seguro da probabilidade
+    z <- -a_i * (nodes - b_i)
+
+    # Evitar overflow
+    z <- pmin(pmax(z, -30), 30)
+
+    exp_z <- exp(z)
+    P <- c_i + (1 - c_i) / (1 + exp_z)
+
+    # Garantir que P esteja em (0,1)
+    P <- pmin(pmax(P, 1e-10), 1 - 1e-10)
 
     r_j <- p_hat[item_idx, ] * N_k
 
+    # Log-verossimilhança com proteção
     ll <- sum(
-      r_j * log(P + 1e-10) +
-        (N_k - r_j) * log(1 - P + 1e-10)
+      r_j * log(P) +
+        (N_k - r_j) * log(1 - P)
     )
+
+    if (!is.finite(ll))
+      return(1e10)
 
     # --- Penalização Beta para c ---
     if (!is.null(prior_c)) {
       alpha <- prior_c[1]
       beta  <- prior_c[2]
 
-      log_prior_c <- (alpha - 1) * log(c_i) +
-        (beta  - 1) * log(1 - c_i)
-
-      ll <- ll + log_prior_c
+      if (c_i > 1e-8 && c_i < (1 - 1e-8)) {
+        log_prior_c <- (alpha - 1) * log(c_i) +
+          (beta - 1) * log(1 - c_i)
+        ll <- ll + log_prior_c
+      }
     }
-
     return(-ll)  # negativo para minimização
   }
 
