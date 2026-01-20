@@ -31,3 +31,5 @@ Imports:
     stringi,
     stringr,
     tableHTML
+URL: https://github.com/alexandrejaloto/INEPsico
+BugReports: https://github.com/alexandrejaloto/INEPsico/issues
