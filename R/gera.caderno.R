@@ -92,12 +92,13 @@ gera.caderno = function (itens, bib, disc.cad = 2)
       bl = data.frame()
       for (k in 1:blocos.disc)
       {
-        bl1 = subset (itens, Bloco == cad.disc [[disciplinas[i]]][x,(2+k)]
+        # k <- 1
+        bl1 = subset (itens, Bloco == cad.disc [[disciplinas[i]]][(x-min(cadernos)+1),(2+k)]
                       & Disciplina == disciplinas[i])	# primeiro bloco do caderno
         bl = rbind (bl, bl1)
       }
 
-      cad = cbind (bl, cad.disc [[disciplinas[i]]][x,1])	# adicionar uma coluna com o número do caderno
+      cad = cbind (bl, cad.disc [[disciplinas[i]]][(x-min(cadernos)+1),1])	# adicionar uma coluna com o número do caderno
 
       cab = c (names (itens), "Caderno")
       names (cad) = cab
