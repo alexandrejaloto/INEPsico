@@ -16,6 +16,14 @@ resultados, o pacote cria arquivos para serem lidos no BILOG-MG.
 A maioria das funções que envolvem análises via TRI são voltadas para
 trabalhar com resultados produzidos nesse programa.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/alexandrejaloto/INEPsico}
+  \item Report bugs at \url{https://github.com/alexandrejaloto/INEPsico/issues}
+}
+
+}
 \author{
 Alexandre Jaloto \href{mailto:alexandre.jaloto@inep.gov.br}{alexandre.jaloto@inep.gov.br}
 }

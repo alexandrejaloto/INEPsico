@@ -36,79 +36,81 @@
 #' @export
 gera.caderno = function (itens, bib, disc.cad = 2)
 {
-# nomes das disciplinas
-#disciplinas = as.character (unique (unlist (bib[,2:(disc.cad+1)])))
-disciplinas = as.character (unique (unlist (bib[,paste0('Disciplina', 1:disc.cad)])))
+  # nomes das disciplinas
+  #disciplinas = as.character (unique (unlist (bib[,2:(disc.cad+1)])))
+  disciplinas = as.character (unique (unlist (bib[,paste0('Disciplina', 1:disc.cad)])))
 
-# número total de cadernos
-tot.cad = max (bib$Caderno)
+  # número total de cadernos
+  # tot.cad = max (bib$Caderno)
+  cadernos = unique(bib$Caderno)
 
-# quantidade de blocos por caderno
-blocos.cad = sum (grepl("Bloco", names(bib)))
+  # quantidade de blocos por caderno
+  blocos.cad = sum (grepl("Bloco", names(bib)))
 
-# quantidade de blocos de cada disciplina em cada caderno
-blocos.disc = blocos.cad/disc.cad
+  # quantidade de blocos de cada disciplina em cada caderno
+  blocos.disc = blocos.cad/disc.cad
 
-# quantidade de blocos de cada disciplina
-blocos = max (bib [, paste0 ('Bloco', 1:blocos.cad)])
+  # quantidade de blocos de cada disciplina
+  blocos = max (bib [, paste0 ('Bloco', 1:blocos.cad)])
 
-################################# CHAMAR DETERMINADO CADERNO E COLOCAR OS ITENS CORRESPONDENTES (UMA ÚNICA TABELA POR DISCIPLINA COM TODA A INFORMAÇÃO) #################################
+  ################################# CHAMAR DETERMINADO CADERNO E COLOCAR OS ITENS CORRESPONDENTES (UMA ÚNICA TABELA POR DISCIPLINA COM TODA A INFORMAÇÃO) #################################
 
-cad.disc2 = list()
-cad.disc = list()
-est.disc = list()
+  cad.disc2 = list()
+  cad.disc = list()
+  est.disc = list()
 
-for (i in 1:length (disciplinas))
-{
-  for (x in 1:tot.cad)
+  for (i in 1:length (disciplinas))
   {
-# selecionar os itens de cada disciplina
-disc = subset (itens, Disciplina == disciplinas[i])
+    # for (x in 1:tot.cad)
+    for (x in cadernos)
+    {
+      # selecionar os itens de cada disciplina
+      disc = subset (itens, Disciplina == disciplinas[i])
 
-# selecionar os cadernos de cada disciplina
-cad.disc2[[disciplinas[i]]] = subset (bib, bib[,2] == disciplinas[i])
+      # selecionar os cadernos de cada disciplina
+      cad.disc2[[disciplinas[i]]] = subset (bib, bib[,2] == disciplinas[i])
 
-# montar tabela com Caderno, Disciplina e Blocos da disciplina no caderno (considera sempre dois blocos por disciplina em cada caderno)
-cad.disc[[disciplinas[i]]] = data.frame (cad.disc2[[disciplinas[i]]][,1], cad.disc2[[disciplinas[i]]][,2],
-                                         cad.disc2[[disciplinas[i]]][,(2+disc.cad):(2+disc.cad+blocos.disc-1)])
+      # montar tabela com Caderno, Disciplina e Blocos da disciplina no caderno (considera sempre dois blocos por disciplina em cada caderno)
+      cad.disc[[disciplinas[i]]] = data.frame (cad.disc2[[disciplinas[i]]][,1], cad.disc2[[disciplinas[i]]][,2],
+                                               cad.disc2[[disciplinas[i]]][,(2+disc.cad):(2+disc.cad+blocos.disc-1)])
 
-cad.d = data.frame()
-for (j in 1:disc.cad)
-{
-cad.disc2[[disciplinas[i]]] = subset (bib, bib[,1+j] == disciplinas[i])
-cad.disc3 = data.frame (cad.disc2[[disciplinas[i]]][,1], cad.disc2[[disciplinas[i]]][,1+j],
-                        cad.disc2[[disciplinas[i]]][,(2+disc.cad+(blocos.disc*(j-1))):(2+disc.cad+(blocos.disc*(j-1))+blocos.disc-1)])
+      cad.d = data.frame()
+      for (j in 1:disc.cad)
+      {
+        cad.disc2[[disciplinas[i]]] = subset (bib, bib[,1+j] == disciplinas[i])
+        cad.disc3 = data.frame (cad.disc2[[disciplinas[i]]][,1], cad.disc2[[disciplinas[i]]][,1+j],
+                                cad.disc2[[disciplinas[i]]][,(2+disc.cad+(blocos.disc*(j-1))):(2+disc.cad+(blocos.disc*(j-1))+blocos.disc-1)])
 
-names (cad.disc3) = c ('Caderno', 'Disciplina', paste0 ('Bloco', 1:blocos.disc))
-cad.d = rbind (cad.d, cad.disc3)
-}
+        names (cad.disc3) = c ('Caderno', 'Disciplina', paste0 ('Bloco', 1:blocos.disc))
+        cad.d = rbind (cad.d, cad.disc3)
+      }
 
 
-# montar tabela com Caderno, Disciplina e Blocos da disciplina no caderno
-cad.disc[[disciplinas[i]]]= cad.d
+      # montar tabela com Caderno, Disciplina e Blocos da disciplina no caderno
+      cad.disc[[disciplinas[i]]]= cad.d
 
-bl = data.frame()
-for (k in 1:blocos.disc)
-  {
-  bl1 = subset (itens, Bloco == cad.disc [[disciplinas[i]]][x,(2+k)]
-                 & Disciplina == disciplinas[i])	# primeiro bloco do caderno
-bl = rbind (bl, bl1)
-}
+      bl = data.frame()
+      for (k in 1:blocos.disc)
+      {
+        bl1 = subset (itens, Bloco == cad.disc [[disciplinas[i]]][x,(2+k)]
+                      & Disciplina == disciplinas[i])	# primeiro bloco do caderno
+        bl = rbind (bl, bl1)
+      }
 
-cad = cbind (bl, cad.disc [[disciplinas[i]]][x,1])	# adicionar uma coluna com o número do caderno
+      cad = cbind (bl, cad.disc [[disciplinas[i]]][x,1])	# adicionar uma coluna com o número do caderno
 
-    cab = c (names (itens), "Caderno")
-    names (cad) = cab
-    nome.disc = disciplinas[i]
+      cab = c (names (itens), "Caderno")
+      names (cad) = cab
+      nome.disc = disciplinas[i]
 
-    est.disc [[nome.disc]] = rbind (est.disc[[nome.disc]], cad)	# montar a estrutura dos cadernos da disciplina
+      est.disc [[nome.disc]] = rbind (est.disc[[nome.disc]], cad)	# montar a estrutura dos cadernos da disciplina
 
+    }
+
+    est.disc[[nome.disc]] = est.disc[[nome.disc]][order (est.disc[[nome.disc]]$Caderno),]
+
+    names (est.disc[[nome.disc]]) = c (names (itens), "Caderno")
   }
 
-  est.disc[[nome.disc]] = est.disc[[nome.disc]][order (est.disc[[nome.disc]]$Caderno),]
-
-  names (est.disc[[nome.disc]]) = c (names (itens), "Caderno")
-}
-
-return (est.disc)
+  return (est.disc)
 }
