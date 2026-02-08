@@ -49,64 +49,51 @@
 #' @export
 
 passo_m <- function(item_idx, p_hat, nodes, N_k, start_params,
-                        prior_c = c(5, 17))
-{
+           prior_c = c(5, 17)) {
 
-  # prior_c = c(5, 17)
+    ll_item <- function(params) {
+      a_i <- params[1]
+      b_i <- params[2]
+      c_i <- params[3]
 
-  ll_item <- function(params) {
-    a_i <- params[1]
-    b_i <- params[2]
-    c_i <- params[3]
+      if (a_i <= 1e-8 | c_i < 0 | c_i > 1) return(1e10)
 
-    # Restrições básicas
-    if (a_i <= 1e-8 | c_i < 0 | c_i > 1)
-      return(1e10)
+      z <- -a_i * (nodes - b_i)
+      z <- pmin(pmax(z, -30), 30)
+      P <- c_i + (1 - c_i) / (1 + exp(z))
+      P <- pmin(pmax(P, 1e-10), 1 - 1e-10)
 
-    # Cálculo seguro da probabilidade
-    z <- -a_i * (nodes - b_i)
+      r_j <- p_hat[item_idx, ] * N_k
 
-    # Evitar overflow
-    z <- pmin(pmax(z, -30), 30)
+      ll <- sum(
+        r_j * log(P) + (N_k - r_j) * log(1 - P),
+        na.rm = TRUE
+      )
 
-    exp_z <- exp(z)
-    P <- c_i + (1 - c_i) / (1 + exp_z)
+      if (!is.finite(ll)) return(1e10)
 
-    # Garantir que P esteja em (0,1)
-    P <- pmin(pmax(P, 1e-10), 1 - 1e-10)
+      # Prior do c
+      if (!is.null(prior_c)) {
+        alpha <- prior_c[1]
+        beta  <- prior_c[2]
 
-    r_j <- p_hat[item_idx, ] * N_k
+        if (c_i > 1e-8 && c_i < (1 - 1e-8)) {
+          log_prior_c <- (alpha - 1) * log(c_i) + (beta - 1) * log(1 - c_i)
+          ll <- ll + log_prior_c
+        }
+      }
 
-    # Log-verossimilhança com proteção
-    ll <- sum(
-      r_j * log(P) +
-        (N_k - r_j) * log(1 - P)
+      return(-ll)
+    }
+
+    opt <- optim(
+      par = start_params,
+      fn = ll_item,
+      method = "L-BFGS-B",
+      lower = c(0.01, -4, 0.001),
+      upper = c(4, 4, 0.35),
+      control = list(maxit = 1000)
     )
 
-    if (!is.finite(ll))
-      return(1e10)
-
-    # --- Penalização Beta para c ---
-    if (!is.null(prior_c)) {
-      alpha <- prior_c[1]
-      beta  <- prior_c[2]
-
-      if (c_i > 1e-8 && c_i < (1 - 1e-8)) {
-        log_prior_c <- (alpha - 1) * log(c_i) +
-          (beta - 1) * log(1 - c_i)
-        ll <- ll + log_prior_c
-      }
-    }
-    return(-ll)  # negativo para minimização
+    return(opt$par)
   }
-
-  opt <- optim(
-    par = start_params,
-    fn = ll_item,
-    method = "L-BFGS-B",
-    lower = c(0.01, -Inf, 1e-4),
-    upper = c(Inf, Inf, 0.35)
-  )
-
-  return(opt$par)
-}

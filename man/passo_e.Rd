@@ -4,16 +4,7 @@
 \alias{passo_e}
 \title{Probabilidade esperada}
 \usage{
-passo_e(
-  a,
-  b,
-  c,
-  nodes = seq(-4, 4, length.out = 40),
-  n_subjects,
-  resp,
-  mu = 0,
-  sigma = 1
-)
+passo_e(a, b, c, nodes = seq(-4, 4, length.out = 40), resp, mu = 0, sigma = 1)
 }
 \arguments{
 \item{a}{valor do parâmetro a}
@@ -23,8 +14,6 @@ passo_e(
 \item{c}{valor do parâmetro c}
 
 \item{nodes}{pontos de quadratura}
-
-\item{n_subjects}{quantidade de sujeitos}
 
 \item{resp}{padrão de resposta dos sujeitos}
 

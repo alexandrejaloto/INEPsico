@@ -59,95 +59,115 @@
 #'
 #' @export
 
-calibrar <- function(resp, nodes = seq(-4, 4, length.out = 40), max_iter = 100, tol = 0.001, fixed_params = NULL)
-{
+calibrar <- function(resp, nodes = seq(-4, 4, length.out = 40),
+                     max_iter = 100, tol = 0.001, fixed_params = NULL) {
 
   resp <- as.matrix(resp)
   n_items <- ncol(resp)
   n_subjects <- nrow(resp)
 
-  # Valores iniciais
-  p <- colMeans(resp, na.rm = TRUE)
+  cat("Itens:", n_items, " | Sujeitos:", n_subjects, "\n")
+  cat("Dados válidos:", sum(!is.na(resp)), "/", prod(dim(resp)),
+      sprintf("(%.1f%%)", 100*sum(!is.na(resp))/prod(dim(resp))), "\n")
 
-  current_params <- matrix(0, nrow = n_items, ncol = 3)
+  # verificar itens sem resposta
+  itens_sem_resposta <- which(colSums(!is.na(resp)) == 0)
 
-  for (j in 1:n_items) {
-    # Estimar c inicial com base no mínimo de acertos
-    c_init <- max(0.001, min(0.3, (1/5) * 0.8))  # assume 5 alternativas
-
-    # Estimar b inicial via logit inverso
-    if (p[j] > c_init && p[j] < (1 - 1e-4)) {
-      logit_p <- log((p[j] - c_init) / (1 - p[j]))
-      b_init <- -logit_p  # assumindo a = 1 inicialmente
-    } else {
-      b_init <- 0
-    }
-
-    # Limitar valores extremos
-    b_init <- pmin(pmax(b_init, -3), 3)
-
-    current_params[j, ] <- c(1.0, b_init, c_init)
+  if (length(itens_sem_resposta) > 0) {
+    stop(sprintf(
+      "Calibração interrompida. Os seguintes itens estão sem resposta: %s",
+      paste(itens_sem_resposta, collapse = ", ")
+    ))
   }
+
+  # valor inicial do a
+  a_init <- 1.0
+
+  # valor inicial do c
+  c_init <- 0.2
+
+  p_j <- colMeans(resp, na.rm = TRUE)
+
+  # Cálculo de b_init
+  mask <- p_j > c_init & p_j < (1 - 1e-4)
+  b_init <- numeric(n_items)
+  b_init[mask] <- -log((p_j[mask] - c_init) / (1 - p_j[mask]))
+  b_init <- pmin(pmax(b_init, -3), 3)
+  b_init[!mask] <- 0
+
+  current_params <- matrix(c(a_init, 0, c_init),
+                           nrow = n_items, ncol = 3, byrow = TRUE)
+
+  current_params[,2] <- b_init
 
   colnames(current_params) <- c("a", "b", "c")
 
-  # Inicialização do Grupo (Métrica)
+  # Itens fixos (âncora)
+  is_fixed <- rep(FALSE, n_items)
+  if (!is.null(fixed_params)) {
+    indices <- fixed_params$item_idx
+    current_params[indices, ] <- as.matrix(fixed_params[, c("a", "b", "c")])
+    is_fixed[indices] <- TRUE
+    cat("Itens fixos (âncora):", indices, "\n")
+  }
+
+  # Algoritmo EM
   current_mu <- 0
   current_sigma <- 1
-
-  # Identificar itens fixos
-  # Criamos um vetor lógico para saber quem otimizar
-  is_fixed <- rep(FALSE, n_items)
-
-  if (!is.null(fixed_params)) {
-    # fixed_params deve ser uma lista/df com: item_idx, a, b, c
-    indices <- fixed_params$item_idx
-    current_params[indices, "a"] <- fixed_params$a
-    current_params[indices, "b"] <- fixed_params$b
-    current_params[indices, "c"] <- fixed_params$c
-    is_fixed[indices] <- TRUE
-  }
 
   for (iter in 1:max_iter) {
     old_params <- current_params
 
-    # --- ETAPA E ---
-    e_step <- passo_e(a = current_params[,1], b = current_params[,2], c = current_params[,3],
-                            nodes = nodes, n_subjects = n_subjects, resp = resp,
-                            mu = current_mu, sigma = current_sigma)
+    # Etapa E
+    e_step <- passo_e(
+      a = current_params[, 1],
+      b = current_params[, 2],
+      c = current_params[, 3],
+      nodes = nodes,
+      resp = resp,
+      mu = current_mu,
+      sigma = current_sigma
+    )
 
-    # --- ATUALIZAÇÃO DA MÉTRICA DO GRUPO ---
-    # Só atualizamos a métrica se houver itens fixos (equalização)
-    # Caso contrário, fixamos em 0 e 1 para identificação padrão
+    # Etapa M
+    for (j in 1:n_items) {
+      if (!is_fixed[j]) {
+        current_params[j, ] <- passo_m(
+          item_idx = j,
+          p_hat = e_step$p_hat,
+          nodes = nodes,
+          N_k = e_step$N_k,
+          start_params = current_params[j, ],
+          prior_c = c(5, 17)
+        )
+      }
+    }
+
+    # Atualizar métrica se houver âncoras
     if (!is.null(fixed_params)) {
       N_k <- e_step$N_k
       current_mu <- sum(N_k * nodes) / sum(N_k)
       current_sigma <- sqrt(sum(N_k * (nodes - current_mu)^2) / sum(N_k))
     }
 
-    # --- ETAPA M ---
-    for (j in 1:n_items) {
-      if (!is_fixed[j])
-        current_params[j,] <- passo_m(item_idx = j,
-                                            p_hat = e_step$p_hat,
-                                            nodes = nodes,
-                                            N_k = e_step$N_k,
-                                            start_params = current_params[j,])
-    }
-
     # Verificar convergência
-    diff <- max(abs(current_params - old_params))
-    cat("Iteração:", iter, "| Mudança Máxima:", round(diff, 6), "\n")
+    diff <- max(abs(current_params - old_params), na.rm = TRUE)
+    cat(sprintf("Iteração %3d | Mudança: %.6f\n", iter, diff))
 
     if (diff < tol) {
       cat("Convergência atingida!\n")
       break
     }
   }
-  # return(current_params)
+
+  # Informações adicionais
+  n_respondentes <- colSums(!is.na(resp))
+
   return(list(
     items = current_params,
     group_stats = c(mean = current_mu, sd = current_sigma),
-    iterations = iter
+    iterations = iter,
+    n_respondentes = n_respondentes,
+    p_hat = e_step$p_hat
   ))
 }

@@ -7,7 +7,6 @@
 #' @param b valor do parâmetro b
 #' @param c valor do parâmetro c
 #' @param nodes pontos de quadratura
-#' @param n_subjects quantidade de sujeitos
 #' @param resp padrão de resposta dos sujeitos
 #' @param mu média do grupo
 #' @param sigma desvio padrão do grupo
@@ -20,41 +19,89 @@
 #'
 #' @export
 
-passo_e <- function(a, b, c, nodes = seq(-4, 4, length.out = 40), n_subjects, resp, mu = 0, sigma = 1)
-{
+passo_e <- function(a, b, c, nodes = seq(-4, 4, length.out = 40), resp, mu = 0, sigma = 1) {
 
+  resp <- as.matrix(resp)
+  n_subjects <- nrow(resp)
+  n_items <- ncol(resp)
+  q <- length(nodes)
+
+  # Pesos dos nós
   A <- dnorm(nodes, mean = mu, sd = sigma)
   A <- A / sum(A)
-  q <- length(nodes)
-  n_items <- length(a)
+
+  # Matriz de probabilidades P_jk
   P_jk <- matrix(0, nrow = n_items, ncol = q)
   for (j in 1:n_items) {
     P_jk[j, ] <- c[j] + (1 - c[j]) / (1 + exp(-a[j] * (nodes - b[j])))
   }
+  P_jk <- pmin(pmax(P_jk, 1e-10), 1 - 1e-10)
 
-  P_jk <- pmin(pmax(P_jk, 1e-10), 1 - 1e-10)  # ANTES de calcular log
+  # Calcular log-verossimilhança ignorando NAs
+  logL <- matrix(0, nrow = n_subjects, ncol = q)
 
-  logL <- resp %*% log(P_jk) + (1 - resp) %*% log(1 - P_jk)
+  logP    <- log(P_jk)
+  log1mP  <- log(1 - P_jk)
 
-  post <- matrix(0, nrow = n_subjects, ncol = q)
-  for (i in 1:n_subjects) {
-    v <- logL[i, ] + log(A)
-    vmax <- max(v)
-    w <- exp(v - vmax)
-    post[i, ] <- w / sum(w)
+  for (i in seq_len(n_subjects)) {
+
+    yi <- resp[i, ]
+    ok <- !is.na(yi)
+
+    if (any(ok)) {
+
+      y_ok <- yi[ok]
+
+      logL[i, ] <-
+        crossprod(y_ok, logP[ok, , drop = FALSE]) +
+        crossprod(1 - y_ok, log1mP[ok, , drop = FALSE])
+
+    } else {
+      logL[i, ] <- 0
+    }
   }
+
+  # log do prior
+  logA <- log(A)
+
+  # soma log-verossimilhança + log-prior
+  V <- sweep(logL, 2, logA, "+")
+
+  # softmax estável por linha
+  V <- V - apply(V, 1, max)
+  W <- exp(V)
+
+  post <- W / rowSums(W)
+
   N_k <- colSums(post)
+  N_k[N_k < 1e-8] <- 1e-8
 
-  # evitar que algum nó fique com 0
-  eps <- 1e-8
-  N_k[N_k < eps] <- eps
-
+  # Calcular r_jk (número esperado de acertos) ignorando NAs
   r_jk <- matrix(0, nrow = n_items, ncol = q)
   for (j in 1:n_items) {
-    r_jk[j, ] <- colSums(post * resp[, j])
+    # Apenas sujeitos que responderam o item j
+    sujeitos_que_responderam <- which(!is.na(resp[, j]))
+
+    r_jk[j, ] <- colSums(post[sujeitos_que_responderam, , drop = FALSE] *
+                           resp[sujeitos_que_responderam, j])
   }
-  p_hat <- r_jk / matrix(rep(N_k, each = n_items), nrow = n_items)
 
-  return(list(p_hat = p_hat, N_k = N_k))
+  # Calcular p_hat: r_jk / N_k_ajustado
+  # Onde N_k_ajustado é o número esperado de sujeitos no nó k que responderam o item j
+  p_hat <- matrix(0, nrow = n_items, ncol = q)
+
+  for (j in 1:n_items) {
+    sujeitos_que_responderam <- which(!is.na(resp[, j]))
+
+    # if (length(sujeitos_que_responderam) > 0) {
+    N_k_ajustado <- colSums(post[sujeitos_que_responderam, , drop = FALSE])
+    N_k_ajustado[N_k_ajustado < 1e-8] <- 1e-8
+    p_hat[j, ] <- r_jk[j, ] / N_k_ajustado
+    p_hat[j, ] <- pmin(pmax(p_hat[j, ], 0), 1)
+    # } else {
+    #   p_hat[j, ] <- rep(0.5, q)  # Item nunca respondido
+    # }
+  }
+
+  return(list(p_hat = p_hat, N_k = N_k, post = post))
 }
-
