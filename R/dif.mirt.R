@@ -14,6 +14,7 @@
 #' @param limite.rmsd limite superior para o RMSD (ajuste e DIF). Itens com RMSD maior que este valor são sinalizados. O padrão é `0.10`.
 #' @param limite.rmsd.pisa limite superior para o RMSD PISA. Itens com RMSD maior que este valor são sinalizados. O padrão é `0.10`.
 #' @param limite.pseudoR2.lordif limite superior para o pseudo R2 de Nagelkerke na análise de regressão logística (lordif). O padrão é `0.035`.
+#' @param aviso valor lógico: manter o aviso para análise de grupo único?
 #'
 #' @return A função retorna uma lista com quatro elementos
 #' \itemize{
@@ -74,7 +75,8 @@ dif.mirt <- function(fit.atual, fit.antigo = NULL,
                      limite.rmsd.pisa = 0.10,
                      p.ajuste = c(0.05, 0.95),
                      p.dif = c(0.05, 0.95),
-                     limite.pseudoR2.lordif = 0.035)
+                     limite.pseudoR2.lordif = 0.035,
+                     aviso = TRUE)
 {
 
   # comuns.atual = NULL
@@ -207,7 +209,7 @@ dif.mirt <- function(fit.atual, fit.antigo = NULL,
     stop('Se os nomes dos itens forem diferentes nos dois bancos, é preciso informar o nome dos itens comuns nos argumentos comuns.antigo e comuns.atual.')
   }
 
-  if(is.null(fit.antigo)) {
+  if(is.null(fit.antigo) & aviso) {
     warning('Como o grupo antigo não foi incluído, não será feita análise de DIF.')
   }
 

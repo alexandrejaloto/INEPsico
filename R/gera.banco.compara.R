@@ -15,13 +15,22 @@
 #'
 gera.banco.compara <- function(banco){
 
-  if (any(all.equal(banco, banco.sim.3PL) != TRUE)) {
+  tipo <- attr(banco, "tipo")
 
+  if (is.null(tipo)) {
+    stop("O objeto 'banco' precisa ser um banco simulado do pacote INEPsico.")
+  }
+
+  if (tipo != "3PL")
+    # if (any(all.equal(banco, banco.sim.3PL) != TRUE))
+  {
     usa.normit <- TRUE
 
-    if (all(all.equal(banco, banco.sim.BIB.aberto) == TRUE))
+    if (tipo == "BIB_aberto")
+      # if (all(all.equal(banco, banco.sim.BIB.aberto) == TRUE))
       banco.aberto <- banco.sim.BIB.aberto
-    if (all(all.equal(banco, banco.sim.BIB.fechado) == TRUE))
+    if (tipo == "BIB_fechado")
+      # if (all(all.equal(banco, banco.sim.BIB.fechado) == TRUE))
     {
       banco.fechado <- banco.sim.BIB.fechado
       resps <- abre.resp(banco.fechado$respostas$TX_RESPOSTA)

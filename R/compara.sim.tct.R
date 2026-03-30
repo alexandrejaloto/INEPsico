@@ -4,19 +4,29 @@
 #' @description Compara resultados da análise pela TCT de bancos simulados.
 #'
 #' @param banco lista com o banco simulado (respostas e gabarito)
-#' @param resultado objeto com resultado da TCT gerado pela função `tct`
+#' @param resultado.tct objeto com resultado da TCT gerado pela função `tct`
 #'
 #' @return A função mostra a comparação na tela.
 #'
 #' @author Alexandre Jaloto
 #'
 #' @examples
-#' compara.sim.tct (banco = banco.sim.3PL, resultado = tct.3PL)
+#' compara.sim.tct (banco = banco.sim.3PL, resultado.tct = tct.3PL)
 #'
 #' @export
-compara.sim.tct <- function(banco, resultado){
+compara.sim.tct <- function(banco, resultado.tct){
 
-  if (any(all.equal(banco, banco.sim.3PL) != TRUE)) {
+  # data(banco.sim.3PL, package = "INEPsico")
+
+  tipo <- attr(banco, "tipo")
+
+  if (is.null(tipo)) {
+    stop("O objeto 'banco' precisa ser um banco simulado do pacote INEPsico.")
+  }
+
+  if (tipo != "3PL")
+    # if (any(all.equal(banco, banco.sim.3PL) != TRUE))
+  {
     usa.normit <- TRUE
   } else {
     usa.normit <- FALSE
@@ -29,16 +39,17 @@ compara.sim.tct <- function(banco, resultado){
   if(usa.normit)
     tct.sim <- tct.sim$tct
 
-  if (ncol(tct.sim) != ncol(resultado))
+  if (ncol(tct.sim) != ncol(resultado.tct))
     stop("O número de colunas do seu objeto de resultado da análise pela TCT não é igual ao oficial. É possível que você tenha especificado quantidade diferente de alternativas")
-  if (nrow(tct.sim) != nrow(resultado))
+  if (nrow(tct.sim) != nrow(resultado.tct))
     stop("O número de itens do seu objeto de resultado da análise pela TCT não é igual ao oficial.")
-  print("Comparação de cada coluna do seu objeto de resultado")
-  for (i in 1:ncol(tct.sim)) {
-    print(paste0(names(tct.sim)[i], ": ", all.equal(resultado[,
-                                                              i], tct.sim[, i])))
-  }
-  if (any(all.equal(resultado, tct.sim) != TRUE)) {
+
+  print("Comparação de cada coluna do seu objeto de resultado (precisa ser TRUE ou 0)")
+
+  problema <- compara.tabelas(resultado.tct, tct.sim)
+
+  if(problema)
+  {
     print("Sugestões de verificação caso haja problema em uma dessas variáveis:")
     print("DIFI ou Prop_X: problemas ao abrir o banco")
     print("DISC, ABAI ou ACIM: escolha diferente do método de calcular o percentil")

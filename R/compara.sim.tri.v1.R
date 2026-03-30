@@ -13,8 +13,7 @@
 #' \item a < .5 ou a > 4
 #' \item nenhum parâmetro b entre -2.5 e 2.5
 #' \item c > .45
-#' \item Problema de ajuste
-#' \item Existência de DIF
+#' \item Problema de ajuste pelo RMSD
 #' }
 #'
 #' @return A função mostra a comparação na tela.
@@ -30,8 +29,15 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
   # data(banco.sim.3PL)
   # banco <- banco.sim.3PL
 
+  tipo <- attr(banco, "tipo")
+
+  if (is.null(tipo)) {
+    stop("O objeto 'banco' precisa ser um banco simulado do pacote INEPsico.")
+  }
+
   # verificar se tem BIB para usar normit
-  if (any(all.equal(banco, banco.sim.3PL) != TRUE)) {
+  if (tipo != "3PL")
+  {
     usa.normit <- TRUE
   } else {
     usa.normit <- FALSE
@@ -49,12 +55,14 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
   # excluir os itens com bisserial < 0
   itens.problema.bis <- tct.sim$Item[tct.sim$BISE < 0]
 
-  data <- mirt::key2binary(banco.aberto$respostas[,-1], banco.aberto$gabarito$Gabarito)
+  banco.mirt <- mirt::key2binary(banco.aberto$respostas[,-1], banco.aberto$gabarito$Gabarito)
 
-  data <- data[,which(!colnames(data) %in% itens.problema.bis)]
+  banco.mirt <- banco.mirt[,which(!colnames(banco.mirt) %in% itens.problema.bis)]
+
+  print('Verificando a calibração dos itens')
 
   # tabela inicial de parâmetros
-  tab.sim <- mirt::mirt(data, 1, '3PL', pars = 'values')
+  tab.sim <- mirt::mirt(banco.mirt, 1, '3PL', pars = 'values')
 
   tab.sim <- pars.priori(tab.sim)
 
@@ -70,9 +78,13 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
 
   while(length(itens.problema) != 0)
   {
-    fit.sim <- mirt::mirt(data, 1, "3PL", pars = tab.sim, TOL = 0.001, SE = FALSE)
-    dif.ajuste <- dif.mirt(fit.atual = fit.sim, limite.rmsd = Inf)
-    eliminados$ajuste <- c(eliminados$ajuste, dif.ajuste$itens)
+
+    fit.sim <- mirt::mirt(banco.mirt, 1, "3PL", pars = tab.sim, TOL = 0.001, SE = FALSE, verbose = FALSE)
+
+    dif.ajuste <- dif.mirt(fit.atual = fit.sim, aviso = FALSE)
+
+    eliminados$ajuste <- c(eliminados$ajuste, dif.ajuste$rmsd.pisa)
+
     pars.sim <- data.frame(mirt::coef(fit.sim, IRTpars = TRUE,
                                       simplify = TRUE)$items)
 
@@ -90,6 +102,7 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
     tab.sim[tab.sim$item %in% itens.problema, 'est'] <- FALSE
   }
 
+  # pars.sim2 <- data.frame(mirt::coef(fit.sim2, IRTpars = TRUE, simplify = TRUE)$items)
   pars.sim <- data.frame(mirt::coef(fit.sim, IRTpars = TRUE, simplify = TRUE)$items)
   pars.fit <- data.frame(mirt::coef(objeto.mirt, IRTpars = TRUE, simplify = TRUE)$items)
 
@@ -98,15 +111,11 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
   print("Itens eliminados:")
   print(eliminados)
 
-  print('Comparação de cada coluna da sua tabela de parâmetros')
-  for(i in 1:ncol(tab.sim))
-  {
-    print(paste0(names(tab.sim)[i],
-                 ': ',
-                 all.equal(tab.pars[,i], tab.sim[,i])))
-  }
+  print('Comparação de cada coluna da sua tabela inicial de parâmetros')
 
-  if(any(all.equal(tab.pars, tab.sim) != TRUE))
+  problema <- compara.tabelas(tab.pars, tab.sim)
+
+  if(problema)
   {
     print('Sugestões de verificação caso haja problema em uma dessas variáveis:')
     print('item: problemas ao nomear os itens')
@@ -114,20 +123,14 @@ compara.sim.tri.v1 <- function(banco, tab.pars, objeto.mirt){
     print('est: itens comuns devem ter est=FALSE; itens excluídos na V1 devem ter est=FALSE')
     print('prior.type, priot_1 ou prior_2: distribuição prévia dos parâmetros errada')
     stop('Tabela de parâmetros com divergência')
-    }
-
-  # all.equal(fit.sim, objeto.mirt)
-
-  print('Comparação de cada parâmetro')
-  for(i in 1:ncol(pars.sim))
-  {
-    print(paste0(names(pars.sim)[i],
-                 ': ',
-                 all.equal(pars.fit[,i], pars.sim[,i])))
   }
 
-  if(any(all.equal(pars.fit, pars.sim) != TRUE))
-    print(paste('Os parâmetros não estão iguais.',
+  print('Comparação de cada parâmetro calibrado')
+
+  problema <- compara.tabelas(pars.fit, pars.sim)
+
+  if(problema)
+    print(paste('Os parâmetros calibrados estão diferentes.',
                 'É possível que o comando utilizado para calibração esteja errado.',
                 'Outra possibilidade é que o ordenamento do banco esteja diferente.', sep = ' '))
 }

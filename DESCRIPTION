@@ -33,3 +33,6 @@ Imports:
     tableHTML
 URL: https://github.com/alexandrejaloto/INEPsico
 BugReports: https://github.com/alexandrejaloto/INEPsico/issues
+Depends: 
+    R (>= 3.5)
+LazyData: true

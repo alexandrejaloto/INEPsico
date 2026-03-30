@@ -17,7 +17,8 @@ dif.mirt(
   limite.rmsd.pisa = 0.1,
   p.ajuste = c(0.05, 0.95),
   p.dif = c(0.05, 0.95),
-  limite.pseudoR2.lordif = 0.035
+  limite.pseudoR2.lordif = 0.035,
+  aviso = TRUE
 )
 }
 \arguments{

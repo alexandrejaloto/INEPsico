@@ -25,8 +25,7 @@ Para a análise, são excluídos automaticamente os itens que apresentem pelo me
 \item a < .5 ou a > 4
 \item nenhum parâmetro b entre -2.5 e 2.5
 \item c > .45
-\item Problema de ajuste
-\item Existência de DIF
+\item Problema de ajuste pelo RMSD
 }
 }
 \examples{
